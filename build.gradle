@@ -89,7 +89,7 @@ idea {
 
 // Default configuration for running matches.
 if (!project.hasProperty("teamA")) {
-    ext.teamA = "examplefuncsplayer"
+    ext.teamA = "MeowPlayer"
 }
 if (!project.hasProperty("teamB")) {
     ext.teamB = "examplefuncsplayer"
