@@ -16,8 +16,6 @@ public class Gardener extends Robot{
         hexDir[3]= hexDir[0].rotateLeftDegrees(180);
         hexDir[4]= hexDir[0].rotateLeftDegrees(240);
         hexDir[5]= hexDir[0].rotateLeftDegrees(300);
-
-        System.out.println("I'm a gardener!");
     }
 
     @Override

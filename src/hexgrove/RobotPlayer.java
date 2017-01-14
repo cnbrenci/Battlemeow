@@ -1,41 +1,111 @@
-package MeowPlayer;
-
+package hexgrove;
 import battlecode.common.*;
 
-/**
- * Created by Cassi on 1/10/2017.
- */
-public class Robot {
-    protected RobotController rc;
-    protected Team enemy;
-    public Robot(RobotController rc){
-        this.rc = rc;
-        enemy = rc.getTeam().opponent();
-        System.out.println("Spawning " + rc.getType().name() + "!");
+public strictfp class RobotPlayer {
+    static RobotController rc;
+    static int plantposition;
+    static Direction hex1,hex2,hex3,hex4,hex5,hex6;
+
+    @SuppressWarnings("unused")
+    public static void run(RobotController rc) throws GameActionException {
+        RobotPlayer.rc = rc;
+        switch (rc.getType()) {
+            case ARCHON:
+                runArchon();
+                break;
+            case GARDENER:
+                runGardener();
+                break;
+            case SOLDIER:
+                runSoldier();
+                break;
+            case LUMBERJACK:
+                runLumberjack();
+                break;
+        }
     }
 
-    public void run()  {
-        while(true){
-            // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
-            try{
-                // The code you want your robot to perform every round should be in this loop
-                runOneTurn();
-
-                // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
-                System.out.println("Ending turn with " + Clock.getBytecodesLeft() + " bytecodes remaining.");
+    static void runArchon() throws GameActionException {
+        while (true) {
+            try {
+                if (rc.canHireGardener(Direction.getNorth())) {
+                    rc.hireGardener(Direction.getNorth());
+                    rc.disintegrate();
+                }
                 Clock.yield();
-            }
-            catch(Exception e) {
-                System.out.println("Unexpected Robot Exception");
+            } catch (Exception e) {
+                System.out.println("Archon Exception");
                 e.printStackTrace();
             }
+        }
+    }
 
+    static void runGardener() throws GameActionException {
+        hex1=Direction.getEast();
+        hex2=hex1.rotateLeftDegrees(60);
+        hex3=hex1.rotateLeftDegrees(120);
+        hex4=hex1.rotateLeftDegrees(180);
+        hex5=hex1.rotateLeftDegrees(240);
+        hex6=hex1.rotateLeftDegrees(300);
+        while (true) {
+            try {
+
+                Clock.yield();
+            } catch (Exception e) {
+                System.out.println("Gardner Exception");
+                e.printStackTrace();
+            }
+        }
+    }
+    static void planttree(Direction hexposition) throws GameActionException {
+        if(rc.getTeamBullets()>GameConstants.BULLET_TREE_COST) {
+            if ( rc.canPlantTree(hexposition) ) {
+                rc.plantTree(hexposition);
+            }
         }
 
     }
+    static void runSoldier() throws GameActionException {
+        while (true) {
+            try {
 
-    public void runOneTurn() throws UnsupportedOperationException, GameActionException {
-        throw new UnsupportedOperationException("I am a plain old robot with no purpose in life. I cannot run :'(");
+                Clock.yield();
+            } catch (Exception e) {
+                System.out.println("Soldier Exception");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    static void runLumberjack() throws GameActionException {
+         while (true) {
+            try {
+
+                Clock.yield();
+            } catch (Exception e) {
+                System.out.println("Lumberjack Exception");
+                e.printStackTrace();
+            }
+        }
+    }
+    static void runScout() throws GameActionException {
+        while (true) {
+            try {
+
+                Clock.yield();
+            } catch (Exception e) {
+                System.out.println("Scout Exception");
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+
+
+
+    static Direction randomDirection() {
+        return new Direction((float)Math.random() * 2 * (float)Math.PI);
     }
 
     /**
@@ -45,8 +115,8 @@ public class Robot {
      * @return true if a move was performed
      * @throws GameActionException
      */
-    public boolean tryMove(Direction dir) throws GameActionException {
-        return tryMove(dir, 20, 3);
+    static boolean tryMove(Direction dir) throws GameActionException {
+        return tryMove(dir,20,3);
     }
 
     /**
@@ -56,9 +126,9 @@ public class Robot {
      * @param degreeOffset Spacing between checked directions (degrees)
      * @param checksPerSide Number of extra directions checked on each side, if intended direction was unavailable
      * @return true if a move was performed
-     * @throws battlecode.common.GameActionException
+     * @throws GameActionException
      */
-    public boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
+    static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
         // First, try intended direction
         if (rc.canMove(dir)) {
@@ -96,7 +166,7 @@ public class Robot {
      * @param bullet The bullet in question
      * @return True if the line of the bullet's path intersects with this robot's current position.
      */
-    public boolean willCollideWithMe(BulletInfo bullet) {
+    static boolean willCollideWithMe(BulletInfo bullet) {
         MapLocation myLocation = rc.getLocation();
 
         // Get relevant bullet information

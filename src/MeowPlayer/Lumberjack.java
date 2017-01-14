@@ -8,7 +8,6 @@ public class Lumberjack extends Robot{
 
     public Lumberjack(RobotController rc) {
         super(rc);
-        System.out.println("I'm a lumberjack!");
     }
 
     @Override

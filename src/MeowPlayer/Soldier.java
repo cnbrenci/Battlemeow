@@ -8,7 +8,6 @@ public class Soldier extends Robot{
 
     public Soldier(RobotController rc) {
         super(rc);
-        System.out.println("I'm a soldier!");
     }
 
     @Override

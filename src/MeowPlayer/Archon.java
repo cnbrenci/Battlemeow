@@ -8,7 +8,6 @@ public class Archon extends Robot{
 
     public Archon(RobotController rc) {
         super(rc);
-        System.out.println("I'm an archon!");
     }
 
     @Override
