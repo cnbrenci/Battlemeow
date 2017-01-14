@@ -18,10 +18,8 @@ public class Archon extends Robot{
         // Randomly attempt to build a gardener in this direction
         if (rc.canHireGardener(dir)) {
             rc.hireGardener(dir);
+            rc.disintegrate();
         }
-
-        // Move randomly
-        this.tryMove(Utils.randomDirection());
 
         // Broadcast archon's location for other robots on the team to know
         MapLocation myLocation = rc.getLocation();
