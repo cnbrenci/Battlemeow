@@ -8,7 +8,6 @@ public class Gardener extends Robot{
 
     public Gardener(RobotController rc) {
         super(rc);
-        System.out.println("I'm a gardener!");
     }
 
     @Override

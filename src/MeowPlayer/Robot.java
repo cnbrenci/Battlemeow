@@ -11,6 +11,7 @@ public class Robot {
     public Robot(RobotController rc){
         this.rc = rc;
         enemy = rc.getTeam().opponent();
+        System.out.println("Spawning " + rc.getType().name() + "!");
     }
 
     public void run()  {
@@ -21,6 +22,7 @@ public class Robot {
                 runOneTurn();
 
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
+                System.out.println("Ending turn with " + Clock.getBytecodesLeft() + " bytecodes remaining.");
                 Clock.yield();
             }
             catch(Exception e) {
