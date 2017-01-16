@@ -8,9 +8,11 @@ import battlecode.common.*;
 public class Robot {
     protected RobotController rc;
     protected Team enemy;
-    public Robot(RobotController rc){
+    protected Messenger messenger;
+    protected Robot(RobotController rc){
         this.rc = rc;
         enemy = rc.getTeam().opponent();
+        this.messenger = new Messenger(rc);
         System.out.println("Spawning " + rc.getType().name() + "!");
     }
 
