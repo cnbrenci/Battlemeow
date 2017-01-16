@@ -15,6 +15,18 @@ public class Lumberjack extends Robot{
 
     @Override
     public void runOneTurn() throws GameActionException {
+
+    }
+
+    private void findNeutralTrees() {
+        TreeInfo[] nearbyNeutralTrees = rc.senseNearbyTrees(RobotType.LUMBERJACK.strideRadius, Team.NEUTRAL);
+        TreeInfo lowestTree = Utils.getLowestTree(nearbyNeutralTrees);
+        while(lowestTree != null) {
+
+        }
+    }
+
+    private void huntEnemyRobots() throws GameActionException {
         // See if there are any enemy robots within striking range (distance 1 from lumberjack's radius)
         RobotInfo[] robots = rc.senseNearbyRobots(RobotType.LUMBERJACK.bodyRadius+GameConstants.LUMBERJACK_STRIKE_RADIUS, enemy);
 

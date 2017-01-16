@@ -19,12 +19,13 @@ public class ScoutHunter extends Robot{
     boolean hasTarget=false;
     Direction targetDirection;
 
-    public ScoutHunter(RobotController rc)
-    {
+    public ScoutHunter(RobotController rc) throws GameActionException {
         super(rc);
         enemyArchonStartingLocations=rc.getInitialArchonLocations(rc.getTeam().opponent());
         targetLocation=pickFirstTarget();
         targetDirection=new Direction (rc.getLocation(),targetLocation);
+        if(Messenger.incrementScoutsCreatedCount(rc) == 1)
+            System.out.println("I'm the first Scout on my team!");
     }
 
     @Override

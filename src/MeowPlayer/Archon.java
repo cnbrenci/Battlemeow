@@ -21,7 +21,7 @@ public class Archon extends Robot{
         Direction dir = Utils.randomDirection();
 
         // Randomly attempt to build a gardener in this direction
-        if (rc.canHireGardener(dir)) {
+        if (rc.canHireGardener(dir) && shouldHireGardener()) {
             rc.hireGardener(dir);
             numGardenersHired++;
         }
@@ -33,10 +33,15 @@ public class Archon extends Robot{
         //rc.broadcast(1,(int)myLocation.y);
     }
 
-    private boolean shouldHireGardener(){
-        if(numGardenersHired == 1 && rc.getTreeCount() < 3 && rc.getRobotCount() >= 2) {
+    private boolean shouldHireGardener() throws GameActionException {
+        int treeCount = rc.getTreeCount();
             return false;
         }
+
+        if(treeCount>=35) {
+            return false;
+        }
+
         return true;
     }
 }

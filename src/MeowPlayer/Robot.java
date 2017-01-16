@@ -20,6 +20,7 @@ public class Robot {
             try{
                 // if we have enough bullets to win, donate them.
                 if(haveEnoughBulletsToWinByDonation()) {
+                    rc.donate(rc.getTeamBullets());
                 }
 
                 // The code you want your robot to perform every round should be in this loop

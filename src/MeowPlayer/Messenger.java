@@ -135,4 +135,12 @@ public class Messenger {
         rc.broadcast(channel, ++currentValue);
         return currentValue;
     }
+
+    public static int getGardenersCreatedCount(RobotController rc) throws GameActionException {
+        return rc.readBroadcast(Channels.GARDENERS_CREATED);
+    }
+
+    public static int getScoutsCreatedCount(RobotController rc) throws GameActionException {
+        return rc.readBroadcast(Channels.SCOUTS_CREATED);
+    }
 }

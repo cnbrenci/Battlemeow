@@ -51,22 +51,28 @@ public class Gardener extends Robot{
             }
         }
 
-        if(rc.getTeamBullets()>80 && rc.canBuildRobot(RobotType.SCOUT, Direction.getEast())) {
+        if(rc.getTeamBullets()>80 && rc.canBuildRobot(RobotType.SCOUT, Direction.getEast()) && shouldBuildScout()) {
             rc.buildRobot(RobotType.SCOUT, Direction.getEast());
         }
     }
 
+    private boolean shouldBuildScout() throws GameActionException {
+        if(rc.getTreeCount() < 3  && rc.getTeamBullets() < 400) {
+            return false;
+        }
+
+        if(Messenger.getScoutsCreatedCount(rc) > 20 && rc.getRobotCount() > 25) {
+            return false;
+        }
+
+        return true;
+    }
+
     private void waterTrees() throws GameActionException {
         //1.1 = radius of gardener (1) + 0.1
-        TreeInfo treeList[] = rc.senseNearbyTrees((float)1.1,rc.getTeam());
-        System.out.println(treeList.length);
-        if ( treeList.length>0 ) {
-            TreeInfo lowestTree = treeList[0];
-            for(TreeInfo tree : treeList) {
-                if ( tree.getHealth()<lowestTree.getHealth() ) {
-                    lowestTree=tree;
-                }
-            }
+        TreeInfo treeList[] = rc.senseNearbyTrees(1.1f, rc.getTeam());
+        if ( treeList.length > 0 ) {
+            TreeInfo lowestTree = Utils.getLowestTree(treeList);
             if(rc.canWater(lowestTree.location)) {
                 rc.water(lowestTree.location);
                 System.out.println("Watering Tree ID: "+lowestTree.getID());
@@ -106,6 +112,7 @@ public class Gardener extends Robot{
                 }
             }
         }
+        // todo: Could use the difficulty to find a grove spot combined with # of trees as an indicator that we need some lumberjacks to cut down trees
         return false;
     }
 }
