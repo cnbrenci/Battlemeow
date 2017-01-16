@@ -18,11 +18,17 @@ public class Robot {
         while(true){
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try{
+                // if we have enough bullets to win, donate them.
+                if(haveEnoughBulletsToWinByDonation()) {
+                }
+
                 // The code you want your robot to perform every round should be in this loop
                 runOneTurn();
 
+                tryShakeTrees();
+
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
-                System.out.println("Ending turn with " + Clock.getBytecodesLeft() + " bytecodes remaining.");
+                //System.out.println("Ending turn with " + Clock.getBytecodesLeft() + " bytecodes remaining.");
                 Clock.yield();
             }
             catch(Exception e) {
@@ -38,6 +44,22 @@ public class Robot {
         throw new UnsupportedOperationException("I am a plain old robot with no purpose in life. I cannot run :'(");
     }
 
+    private boolean haveEnoughBulletsToWinByDonation()
+    {
+        return (GameConstants.VICTORY_POINTS_TO_WIN - rc.getTeamVictoryPoints()) <= (rc.getTeamBullets() / GameConstants.BULLET_EXCHANGE_RATE);
+    }
+
+    private boolean tryShakeTrees() throws GameActionException {
+        TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
+        for(TreeInfo tree : nearbyTrees) {
+            if(rc.canShake(tree.getID())) {
+                rc.shake(tree.getID());
+                System.out.println("shook tree!");
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * Attempts to move in a given direction, while avoiding small obstacles directly in the path.
      *
@@ -45,7 +67,7 @@ public class Robot {
      * @return true if a move was performed
      * @throws GameActionException
      */
-    public boolean tryMove(Direction dir) throws GameActionException {
+    protected boolean tryMove(Direction dir) throws GameActionException {
         return tryMove(dir, 20, 3);
     }
 
@@ -58,7 +80,7 @@ public class Robot {
      * @return true if a move was performed
      * @throws battlecode.common.GameActionException
      */
-    public boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
+    protected boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
         // First, try intended direction
         if (rc.canMove(dir)) {
@@ -96,7 +118,7 @@ public class Robot {
      * @param bullet The bullet in question
      * @return True if the line of the bullet's path intersects with this robot's current position.
      */
-    public boolean willCollideWithMe(BulletInfo bullet) {
+    protected boolean willCollideWithMe(BulletInfo bullet) {
         MapLocation myLocation = rc.getLocation();
 
         // Get relevant bullet information
@@ -120,5 +142,10 @@ public class Robot {
         float perpendicularDist = (float)Math.abs(distToRobot * Math.sin(theta)); // soh cah toa :)
 
         return (perpendicularDist <= rc.getType().bodyRadius);
+    }
+
+    protected boolean isWithinMyStrideRadius(MapLocation loc)
+    {
+        return rc.getLocation().isWithinDistance(loc, rc.getType().strideRadius);
     }
 }
