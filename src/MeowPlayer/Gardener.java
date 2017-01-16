@@ -24,8 +24,10 @@ public class Gardener extends Robot{
     public void runOneTurn() throws GameActionException {
         //buildHex(0);
         //waterTrees();
-        rc.buildRobot(RobotType.SCOUT,Direction.getEast());
-        rc.disintegrate();
+        if(rc.getTeamBullets()>80) {
+            rc.buildRobot(RobotType.SCOUT, Direction.getEast());
+            rc.disintegrate();
+        }
     }
     private void waterTrees() throws GameActionException {
         //1.1 = radius of gardener (1) + 0.1

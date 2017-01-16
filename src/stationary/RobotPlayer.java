@@ -51,6 +51,7 @@ public strictfp class RobotPlayer {
                 Direction testdir = randomDirection();
                 if (rc.canHireGardener(testdir) ) {
                     rc.hireGardener(testdir);
+                    rc.disintegrate();
                 }
                 Clock.yield();
             } catch (Exception e) {
@@ -64,7 +65,8 @@ public strictfp class RobotPlayer {
 
         while (true) {
             try {
-                tryMove(randomDirection());
+                Clock.yield();
+                //tryMove(randomDirection());
                 Clock.yield();
             } catch (Exception e) {
                 System.out.println("Gardner Exception");
