@@ -22,6 +22,19 @@ public class Soldier extends Robot{
 
         // If there are some...
         if (robots.length > 0) {
+            for (RobotInfo robot: robots)
+            {
+                int targetId;
+
+                if (robot.getType() == RobotType.GARDENER)
+                {
+                    rc.move(robot.getLocation().directionTo(robot.location));
+                    if (rc.canFireSingleShot()) {
+                        // ...Then fire a bullet in the direction of the enemy.
+                        rc.fireSingleShot(rc.getLocation().directionTo(robot.location));
+                    }
+                }
+            }
             // And we have enough bullets, and haven't attacked yet this turn...
             if (rc.canFireSingleShot()) {
                 // ...Then fire a bullet in the direction of the enemy.
