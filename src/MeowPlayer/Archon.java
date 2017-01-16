@@ -35,6 +35,8 @@ public class Archon extends Robot{
 
     private boolean shouldHireGardener() throws GameActionException {
         int treeCount = rc.getTreeCount();
+        int robotCount = rc.getRobotCount();
+        if(Messenger.getGardenersCreatedCount(rc) == 1 && treeCount < 4 && robotCount >= 2 && robotCount < 4) {
             return false;
         }
 
