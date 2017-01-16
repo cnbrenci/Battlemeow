@@ -12,11 +12,12 @@ public class Scout extends Robot{
     boolean hasFoundSide =false, hasFoundCorner =false, hasFoundMapSize=false;
     Direction currentDirection, firstDirection, secondDirection;
 
-    public Scout(RobotController rc)
-    {
+    public Scout(RobotController rc) throws GameActionException {
         super(rc);
         firstDirection = getFirstDirection();
         currentDirection = firstDirection;
+        if(Messenger.incrementScoutsCreatedCount(rc) == 1)
+            System.out.println("I'm the first Scout on my team!");
     }
 
     @Override

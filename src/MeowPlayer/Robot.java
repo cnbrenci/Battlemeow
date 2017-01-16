@@ -8,7 +8,7 @@ import battlecode.common.*;
 public class Robot {
     protected RobotController rc;
     protected Team enemy;
-    public Robot(RobotController rc){
+    protected Robot(RobotController rc){
         this.rc = rc;
         enemy = rc.getTeam().opponent();
         System.out.println("Spawning " + rc.getType().name() + "!");
