@@ -35,6 +35,10 @@ public strictfp class RobotPlayer {
                     Lumberjack lumberjack = new Lumberjack(rc);
                     lumberjack.run();
                     break;
+                case SCOUT:
+                    Scout scout = new Scout(rc);
+                    scout.run();
+                    break;
             }
         }
         catch(Exception e){
