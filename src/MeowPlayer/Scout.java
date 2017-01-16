@@ -22,6 +22,7 @@ public class Scout extends Robot{
     @Override
     public void runOneTurn() throws GameActionException {
         setMapDimensions();
+        System.out.println("First Direction: "+firstDirection+", Second Direction: "+secondDirection);
         if ( rc.getRoundNum()>200)
             rc.disintegrate();
     }
@@ -33,17 +34,14 @@ public class Scout extends Robot{
             boolean hitSomething = travelTowardEdge( currentDirection );
             if ( hitSomething )
             {
+                int edgeCount=0,sideHit=0;
                 boolean[] atEdge=checkForMapEdges();
-                int edgeCount=0;
                 for(int edgeToCheck=0;edgeToCheck<4;edgeToCheck++)
                 {
                     if(atEdge[edgeToCheck])
                     {
                         edgeCount++;
-                        if(secondDirection==null)
-                        {
-                            secondDirection = getSecondDirection(firstDirection, ordinalDirections[edgeToCheck]);
-                        }
+                        sideHit=edgeToCheck;
                     }
                 }
                 if ( edgeCount==0 )
@@ -56,12 +54,13 @@ public class Scout extends Robot{
                         if ( collision[dirToCheck])
                         {
                             collisionCount++;
-                            if(secondDirection==null)
-                            {
-                                secondDirection = getSecondDirection(firstDirection, ordinalDirections[dirToCheck]);
-                            }
+                            sideHit=dirToCheck;
                         }
                     }
+                }
+                if(secondDirection==null)
+                {
+                    secondDirection = getSecondDirection(firstDirection, ordinalDirections[sideHit]);
                 }
                 if ( edgeCount<2)
                 {
@@ -77,7 +76,7 @@ public class Scout extends Robot{
                     {
                         corner1 = rc.getLocation();
                         firstDirection=firstDirection.opposite();
-                        secondDirection=secondDirection.opposite();
+                        //secondDirection=secondDirection.opposite();
                         currentDirection=firstDirection;
                     }
                     else {
@@ -98,10 +97,10 @@ public class Scout extends Robot{
         y1=corner1.y;
         x2=midpoint.x-(corner1.x-midpoint.x);
         y2=midpoint.y-(corner1.y-midpoint.y);
-        minX=x1<x2?x1:x2;//-rc.getType().bodyRadius;
-        minY=y1<y2?y1:y2;//-rc.getType().bodyRadius;
-        maxX=x1>x2?x1:x2;//+rc.getType().bodyRadius;
-        maxY=y1>y2?y1:y2;//+rc.getType().bodyRadius;
+        minX=x1<x2?x1:x2;
+        minY=y1<y2?y1:y2;
+        maxX=x1>x2?x1:x2;
+        maxY=y1>y2?y1:y2;
         minX-=rc.getType().bodyRadius;
         minY-=rc.getType().bodyRadius;
         maxX+=rc.getType().bodyRadius;
