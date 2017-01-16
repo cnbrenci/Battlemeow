@@ -15,29 +15,36 @@ public strictfp class RobotPlayer {
         // and to get information on its current status.
         RobotPlayer.rc = rc;
 
-        // Here, we've separated the controls into a different method for each RobotType.
-        // You can add the missing ones or rewrite this into your own control structure.
-        switch (rc.getType()) {
-            case ARCHON:
-                Archon archon = new Archon(rc);
-                archon.run();
-                break;
-            case GARDENER:
-                Gardener gardener = new Gardener(rc);
-                gardener.run();
-                break;
-            case SOLDIER:
-                Soldier soldier = new Soldier(rc);
-                soldier.run();
-                break;
-            case LUMBERJACK:
-                Lumberjack lumberjack = new Lumberjack(rc);
-                lumberjack.run();
-                break;
-            case SCOUT:
-                ScoutHunter scout = new ScoutHunter(rc);
-                scout.run();
-                break;
+        try {
+            // Here, we've separated the controls into a different method for each RobotType.
+            // You can add the missing ones or rewrite this into your own control structure.
+            switch (rc.getType()) {
+                case ARCHON:
+                    Archon archon = new Archon(rc);
+                    archon.run();
+                    break;
+                case GARDENER:
+                    Gardener gardener = new Gardener(rc);
+                    gardener.run();
+                    break;
+                case SOLDIER:
+                    Soldier soldier = new Soldier(rc);
+                    soldier.run();
+                    break;
+                case LUMBERJACK:
+                    Lumberjack lumberjack = new Lumberjack(rc);
+                    lumberjack.run();
+                    break;
+                case SCOUT:
+                    //Scout scout = new Scout(rc);
+                    ScoutHunter scout = new ScoutHunter(rc);
+                    scout.run();
+                    break;
+            }
         }
-	}
+        catch(Exception e){
+            System.out.println("Unexpected Exception");
+            e.printStackTrace();
+        }
+    }
 }
