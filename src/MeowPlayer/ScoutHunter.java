@@ -1,105 +1,226 @@
 package MeowPlayer;
-
+import Utilities.Utils;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.*;
-
+import java.util.ArrayList;
 /**
  * Created by Chris on 1/13/2017.
  */
 public class ScoutHunter extends Robot{
-    private double minX, minY, maxX, maxY;
-    int targetID;
-    float nextStride;
-    MapLocation[] enemyArchonStartingLocations;
-    Direction [] ordinalDirections={Direction.getEast(),Direction.getNorth(),Direction.getWest(),Direction.getSouth()};
-    MapLocation targetLocation;
+    int timeRange=20;
+    int distRange=30;
+
     boolean hasTarget=false;
-    Direction targetDirection;
+    boolean hasDestination=false;
+    boolean[] checkedArchonStartLocations;
+
+    RobotInfo target;
+    RobotInfo[] sensedEnemies;
+
+    MapLocation destination;
+    MapLocation[] enemyArchonStartingLocations;
+
+    private ArrayList<EnemyMemory> gardenerList = new ArrayList<EnemyMemory>();
+    private ArrayList<EnemyMemory> archonList = new ArrayList<EnemyMemory>();
 
     public ScoutHunter(RobotController rc)
     {
         super(rc);
         enemyArchonStartingLocations=rc.getInitialArchonLocations(rc.getTeam().opponent());
-        targetLocation=pickFirstTarget();
-        targetDirection=new Direction (rc.getLocation(),targetLocation);
+        checkedArchonStartLocations=new boolean[enemyArchonStartingLocations.length];
+        for(int i=0; i<checkedArchonStartLocations.length; i++)
+            checkedArchonStartLocations[i]=false;
     }
 
     @Override
     public void runOneTurn() throws GameActionException {
-        RobotInfo[] enemyInfo = rc.senseNearbyRobots(-1, enemy);
+        System.out.println("Round "+rc.getRoundNum());
+        //reset variables
+        target=null;
+        destination=null;
 
+        //sense nearby enemies
+        sensedEnemies = rc.senseNearbyRobots(-1,enemy);
 
-        //sense for gardeners
-        hasTarget=false;
-        for (RobotInfo enemyCheck : enemyInfo )
+        //update sensed map
+        int enemyIndex=processEnemyInfo();
+
+        for(EnemyMemory asdf : gardenerList)
         {
-            if (enemyCheck.type.equals(RobotType.GARDENER))
+            System.out.println(asdf.unitIDNumber);
+            System.out.println(asdf.unitIDNumber);
+        }
+
+        //if there are gardeners in the sight range, target weakest gardener
+        if(enemyIndex>=0) {
+            target = sensedEnemies[enemyIndex];
+            destination=target.getLocation();
+            System.out.println("Destination = gardener in sight");
+        }
+
+        //otherwise get destination from memory
+        if ( destination==null) {
+            destination = getGardenerFromMemory();
+            if(destination != null)
+                System.out.println("Destination = gardener from memory");
+        }
+
+        //note if within sight range of enemy starting locations
+        for (int i=0;i<checkedArchonStartLocations.length; i++)
+            if (rc.getLocation().distanceTo(enemyArchonStartingLocations[i]) < 10)
+                checkedArchonStartLocations[i] = true;
+
+        //check unchecked archon starting locations
+        if ( destination==null) {
+            destination = getStartingLocationToCheck();
+            if(destination != null)
+                System.out.println("Destination = enemy archon spawn location");
+        }
+
+        //otherwise head to location of last seen Archon
+        if (destination==null) {
+            destination = getArchonFromMemory();
+            if(destination != null)
+                System.out.println("Destination = archon from memory");
+        }
+
+        //patrol
+        if (destination==null) {
+            destination = rc.getLocation().add(Utils.randomDirection(), 10);
+            if(destination != null)
+                System.out.println("Destination = random patrol");
+        }
+
+        //move towards destination
+        if ( destination != null )
+            headToward(destination);
+
+        //try to fire
+        if ( target!= null)
+            tryToFire();
+
+    }
+
+    public void tryToFire() throws GameActionException {
+        if (rc.canFireSingleShot() && rc.getLocation().distanceTo(target.getLocation())<rc.getType().bodyRadius+target.getType().bodyRadius+rc.getType().bulletSpeed)
+        {
+            rc.fireSingleShot(rc.getLocation().directionTo(target.getLocation()));
+        }
+    }
+
+    public MapLocation getStartingLocationToCheck()
+    {
+        MapLocation closestLocation=null;
+        float distToClosestLocation=1000;
+        for(int i=0; i<enemyArchonStartingLocations.length; i++)
+        {
+
+            if (!checkedArchonStartLocations[i] );
             {
-                //set closest gardener as target
-                targetLocation=enemyCheck.location;
-                targetDirection=new Direction (rc.getLocation(),targetLocation);
-                targetID=enemyCheck.ID;
-                hasTarget=true;
-                break;
-            }
-        }
-
-        //move as close as can to target
-        if (rc.canMove(targetDirection) )
-        {
-            if (!rc.hasMoved())
-                rc.move(targetDirection,nextStride);
-        }
-        else
-        {
-            for (float stridesize = nextStride; stridesize > 0; stridesize = stridesize - (float) 0.1) {
-                if (rc.canMove(targetDirection, stridesize) && !rc.hasMoved()) {
-                    rc.move(targetDirection, stridesize);
+                float distanceToStartLocation=rc.getLocation().distanceTo(enemyArchonStartingLocations[i]);
+                if (distanceToStartLocation<distToClosestLocation) {
+                    //System.out.println(enemyArchonStartingLocations[i] + "  Checked? " + checkedArchonStartLocations[i] + "  Distance: " + rc.getLocation().distanceTo(enemyArchonStartingLocations[i]));
+                    closestLocation = enemyArchonStartingLocations[i];
+                    distToClosestLocation = rc.getLocation().distanceTo(enemyArchonStartingLocations[i]);
                 }
             }
         }
-        //fire
-        if (rc.canFireSingleShot()&&hasTarget)
-        {
-            rc.fireSingleShot(targetDirection);
-            nextStride=(float)1.5;
-        }
-        else
-        {
-            nextStride=(float)2.5;
-        }
-
-        //if find gardener, taget closest
-        //sense for archons
+        return closestLocation;
     }
 
-    public MapLocation pickFirstTarget()
+    public MapLocation getGardenerFromMemory()
     {
-        for (MapLocation test : enemyArchonStartingLocations)
-            System.out.println(test+", "+test.distanceTo(rc.getLocation()));
-
-        int numEnemyArchons=enemyArchonStartingLocations.length;
-        float distanceToEnemy,closestEnemy;
-        closestEnemy=enemyArchonStartingLocations[0].distanceTo(rc.getLocation());
-        targetLocation=enemyArchonStartingLocations[0];
-        if ( numEnemyArchons>1 )
-        {
-            for (int i = 1; i < numEnemyArchons; i++)
+        for (EnemyMemory rememberedRobot : gardenerList) {
+            if (rc.getRoundNum()-rememberedRobot.turnSeen<timeRange)
             {
-                distanceToEnemy=enemyArchonStartingLocations[i].distanceTo(rc.getLocation());
-                if(distanceToEnemy<closestEnemy)
-                    targetLocation=enemyArchonStartingLocations[i];
+                if (rc.getLocation().distanceTo(rememberedRobot.lastLocation)<distRange)
+                {
+                    return rememberedRobot.lastLocation;
+                }
             }
         }
-        return targetLocation;
-    }
-    public void hunt() throws GameActionException{
-        
-
+        return null;
     }
 
+    public MapLocation getArchonFromMemory()
+    {
+        MapLocation archonLastSeen=null;
+        int roundLastSeen=0;
+        for (EnemyMemory rememberedRobot : archonList) {
+            if (rememberedRobot.turnSeen>roundLastSeen)
+            {
+                archonLastSeen=rememberedRobot.lastLocation;
+                roundLastSeen=rememberedRobot.turnSeen;
+            }
+        }
+        return archonLastSeen;
+    }
 
+    public void headToward(MapLocation destination) throws GameActionException {
+        //move as close as can to target
+        if (!rc.hasMoved())
+        {
+            if(rc.getLocation().distanceTo(destination)<rc.getType().strideRadius)
+            {
+                //for (float stridesize = rc.getType().strideRadius; stridesize > 0; stridesize = stridesize - (float) 0.1) {
+                //    if (rc.canMove(rc.getLocation().directionTo(target.getLocation()), stridesize)) {
+                //        rc.move(rc.getLocation().directionTo(destination), stridesize);
+                //    }
+                //}
+            }
+            else
+            {
+                tryMove(rc.getLocation().directionTo(destination), 10, 9);
+            }
+        }
+    }
+
+    public int processEnemyInfo()
+    {
+        int weakestGardenerIndex=-1;
+        int currentIndex=0;
+        float weakestGardenerHealth=1000;
+        boolean alreadySeen;
+
+        if(sensedEnemies.length>0) {
+            for (RobotInfo sensedRobot : sensedEnemies) {
+                if (sensedRobot.type.equals(RobotType.GARDENER)) {
+                    if(sensedRobot.health<weakestGardenerHealth) {
+                        weakestGardenerIndex = currentIndex;
+                        weakestGardenerHealth=(float)sensedRobot.health;
+                    }
+                    alreadySeen = false;
+                    for (EnemyMemory rememberedRobot : gardenerList) {
+                        if (sensedRobot.getID()-rememberedRobot.unitIDNumber==0)
+                        {
+                            rememberedRobot.updateMemory(sensedRobot, rc.getRoundNum());
+                            alreadySeen = true;
+                            break;
+                        }
+                    }
+                    if (!alreadySeen)
+                        gardenerList.add(new EnemyMemory(sensedRobot, rc.getRoundNum()));
+
+                }
+                if (sensedRobot.type.equals(RobotType.ARCHON)) {
+                    alreadySeen=false;
+                    for (EnemyMemory rememberedRobot : archonList) {
+                        if (sensedRobot.getID() == rememberedRobot.unitIDNumber)
+                        {
+                            rememberedRobot.updateMemory(sensedRobot,rc.getRoundNum());
+                            alreadySeen=true;
+                            break;
+                        }
+                    }
+                    if (!alreadySeen)
+                        archonList.add(new EnemyMemory(sensedRobot,rc.getRoundNum()));
+                }
+                currentIndex++;
+            }
+        }
+        return weakestGardenerIndex;
+    }
 }
