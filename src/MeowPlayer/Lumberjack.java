@@ -7,8 +7,10 @@ import battlecode.common.*;
  */
 public class Lumberjack extends Robot{
 
-    public Lumberjack(RobotController rc) {
+    public Lumberjack(RobotController rc) throws GameActionException {
         super(rc);
+        if(Messenger.incrementLumberjacksCreatedCount(rc) == 1)
+            System.out.println("I'm the first Lumberjack on my team!");
     }
 
     @Override

@@ -7,8 +7,10 @@ import battlecode.common.*;
 public class Gardener extends Robot{
     private Direction[] hexDir = new Direction[6];
     private boolean[] treePlanted;
-    public Gardener(RobotController rc) {
+    public Gardener(RobotController rc) throws GameActionException {
         super(rc);
+        if(Messenger.incrementGardenersCreatedCount(rc) == 1)
+            System.out.println("I'm the first Gardener on my team!");
 
         hexDir[0]=Direction.getEast();
         hexDir[1]= hexDir[0].rotateLeftDegrees(60);

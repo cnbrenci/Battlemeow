@@ -7,8 +7,10 @@ import battlecode.common.*;
  */
 public class Archon extends Robot{
 
-    public Archon(RobotController rc) {
+    public Archon(RobotController rc) throws GameActionException {
         super(rc);
+        if(Messenger.incrementArchonsCreatedCount(rc) == 1)
+            System.out.println("I'm the first Archon on my team!");
     }
 
     @Override

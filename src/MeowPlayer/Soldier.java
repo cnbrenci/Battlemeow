@@ -7,8 +7,10 @@ import battlecode.common.*;
  */
 public class Soldier extends Robot{
 
-    public Soldier(RobotController rc) {
+    public Soldier(RobotController rc) throws GameActionException {
         super(rc);
+        if(Messenger.incrementSoldiersCreatedCount(rc) == 1)
+            System.out.println("I'm the first Soldier on my team!");
     }
 
     @Override

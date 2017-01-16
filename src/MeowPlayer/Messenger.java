@@ -54,26 +54,7 @@ public class Messenger {
         final private static int TANKS_CREATED = 19;
     }
 
-    private RobotController rc;
-    private static int createdOrder;
-
-    public Messenger(RobotController rc) {
-        this.rc = rc;
-        try
-        {
-            this.createdOrder = newUnitCreated();
-        }
-        catch(Exception e)
-        {
-            System.out.println("Unexpected exception in newUnitCreated. " +
-                    "We aren't going to have reliable createdOrder, but we don't want to crash the game so...  " +
-                    "guess we'll just eat this exception and see what happens.");
-            e.printStackTrace();
-        }
-
-    }
-
-    private void InitOncePerGame() throws GameActionException {
+    private static void InitOncePerGame(RobotController rc) throws GameActionException {
         // whether they have been set yet
         rc.broadcast(Channels.NORTH_WALL, -1);
         rc.broadcast(Channels.EAST_WALL, -1);
@@ -85,7 +66,7 @@ public class Messenger {
      * A robot who has found the edge or corner of the map should call this in order to
      * save that information into the team's shared consciousness.
      */
-    public void recordMapEdge(MapLocation loc, SimpleDirection dir) throws GameActionException {
+    public static void recordMapEdge(RobotController rc, MapLocation loc, SimpleDirection dir) throws GameActionException {
         switch(dir)
         {
             case North:
@@ -119,55 +100,39 @@ public class Messenger {
         }
     }
 
-    /*
-    Returns the build number for this robot -
-    this number is essentially the count of how many robots of that type have been built
-     */
-    public int getRobotBuildNumber()
-    {
-        return createdOrder;
-    }
 
-    /*
-     * Unit Type Build Counters
-     *
-     */
-    private int newUnitCreated() throws GameActionException {
-        int currentValue = 0;
-        switch(rc.getType())
-        {
-            case ARCHON:
-                currentValue = rc.readBroadcast(Channels.ARCHONS_CREATED);
-                rc.broadcast(Channels.ARCHONS_CREATED, ++currentValue);
-                if(currentValue == 1) // this is our first Archon i.e. first unit in the game
-                    InitOncePerGame();
-                break;
-            case GARDENER:
-                currentValue = rc.readBroadcast(Channels.GARDENERS_CREATED);
-                rc.broadcast(Channels.GARDENERS_CREATED, ++currentValue);
-                break;
-            case LUMBERJACK:
-                currentValue = rc.readBroadcast(Channels.LUMBERJACKS_CREATED);
-                rc.broadcast(Channels.LUMBERJACKS_CREATED, ++currentValue);
-                break;
-            case SOLDIER:
-                currentValue = rc.readBroadcast(Channels.SOLDIERS_CREATED);
-                rc.broadcast(Channels.SOLDIERS_CREATED, ++currentValue);
-                break;
-            case TANK:
-                currentValue = rc.readBroadcast(Channels.TANKS_CREATED);
-                rc.broadcast(Channels.TANKS_CREATED, ++currentValue);
-                break;
-            case SCOUT:
-                currentValue = rc.readBroadcast(Channels.SCOUTS_CREATED);
-                rc.broadcast(Channels.SCOUTS_CREATED, ++currentValue);
-                break;
-            default:
-                throw new UnsupportedOperationException("Robot Type: " + rc.getType());
-        }
-
+    public static int incrementArchonsCreatedCount(RobotController rc) throws GameActionException {
+        int currentValue = rc.readBroadcast(Channels.ARCHONS_CREATED);
+        rc.broadcast(Channels.ARCHONS_CREATED, ++currentValue);
+        if(currentValue == 1) // this is our first Archon i.e. first unit in the game
+            InitOncePerGame(rc);
         return currentValue;
     }
 
+    public static int incrementGardenersCreatedCount(RobotController rc) throws GameActionException {
+        return incrementCreatedCount(rc, Channels.GARDENERS_CREATED);
 
+    }
+
+    public static int incrementLumberjacksCreatedCount(RobotController rc) throws GameActionException {
+        return incrementCreatedCount(rc, Channels.LUMBERJACKS_CREATED);
+    }
+
+    public static int incrementSoldiersCreatedCount(RobotController rc) throws GameActionException {
+        return incrementCreatedCount(rc, Channels.SOLDIERS_CREATED);
+    }
+
+    public static int incrementTanksCreatedCount(RobotController rc) throws GameActionException {
+        return incrementCreatedCount(rc, Channels.TANKS_CREATED);
+    }
+
+    public static int incrementScoutsCreatedCount(RobotController rc) throws GameActionException {
+        return incrementCreatedCount(rc, Channels.SCOUTS_CREATED);
+    }
+
+    private static int incrementCreatedCount(RobotController rc, int channel) throws GameActionException {
+        int currentValue = rc.readBroadcast(channel);
+        rc.broadcast(channel, ++currentValue);
+        return currentValue;
+    }
 }
