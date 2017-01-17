@@ -75,7 +75,7 @@ public class Gardener extends Robot{
             TreeInfo lowestTree = Utils.getLowestTree(treeList);
             if(rc.canWater(lowestTree.location)) {
                 rc.water(lowestTree.location);
-                System.out.println("Watering Tree ID: "+lowestTree.getID());
+                //System.out.println("Watering Tree ID: "+lowestTree.getID());
             }
         }
     }

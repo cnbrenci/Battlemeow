@@ -8,6 +8,7 @@ import battlecode.common.*;
 public class Robot {
     protected RobotController rc;
     protected Team enemy;
+
     protected Robot(RobotController rc){
         this.rc = rc;
         enemy = rc.getTeam().opponent();
@@ -55,7 +56,6 @@ public class Robot {
         for(TreeInfo tree : nearbyTrees) {
             if(rc.canShake(tree.getID())) {
                 rc.shake(tree.getID());
-                System.out.println("shook tree!");
                 return true;
             }
         }
