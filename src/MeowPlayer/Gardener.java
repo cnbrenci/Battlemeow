@@ -57,11 +57,7 @@ public class Gardener extends Robot{
     }
 
     private boolean shouldBuildScout() throws GameActionException {
-        if(rc.getTreeCount() < 3  && rc.getTeamBullets() < 400) {
-            return false;
-        }
-
-        if(Messenger.getScoutsCreatedCount(rc) > 20 && rc.getRobotCount() > 25) {
+        if(Messenger.getScoutsCreatedCount(rc) > 10 && rc.getRobotCount() > 12) {
             return false;
         }
 
