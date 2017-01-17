@@ -26,13 +26,17 @@ public class ScoutHunter extends Robot{
     private ArrayList<EnemyMemory> gardenerList = new ArrayList<EnemyMemory>();
     private ArrayList<EnemyMemory> archonList = new ArrayList<EnemyMemory>();
 
-    public ScoutHunter(RobotController rc)
-    {
+    public ScoutHunter(RobotController rc) throws GameActionException {
         super(rc);
+        if(Messenger.incrementScoutsCreatedCount(rc) == 1)
+            System.out.println("I'm the first Scout on my team!");
+        
         enemyArchonStartingLocations=rc.getInitialArchonLocations(rc.getTeam().opponent());
+
         checkedArchonStartLocations=new boolean[enemyArchonStartingLocations.length];
         for(int i=0; i<checkedArchonStartLocations.length; i++)
             checkedArchonStartLocations[i]=false;
+
     }
 
     @Override
