@@ -30,4 +30,17 @@ public class Utils {
     {
         return Direction.getSouth().rotateRightDegrees(45);
     }
+
+    public static TreeInfo getLowestTree(TreeInfo[] trees) {
+        if ( trees.length>0 ) {
+            TreeInfo lowestTree = trees[0];
+            for(TreeInfo tree : trees) {
+                if ( tree.getHealth()<lowestTree.getHealth() ) {
+                    lowestTree=tree;
+                }
+            }
+            return lowestTree;
+        }
+        return null;
+    }
 }

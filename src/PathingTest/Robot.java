@@ -1,4 +1,4 @@
-package MeowPlayer;
+package PathingTest;
 
 import battlecode.common.*;
 

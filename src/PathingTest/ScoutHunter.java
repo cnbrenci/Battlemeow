@@ -1,4 +1,4 @@
-package MeowPlayer;
+package PathingTest;
 import Utilities.Utils;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -41,23 +41,7 @@ public class ScoutHunter extends Robot{
 
     @Override
     public void runOneTurn() throws GameActionException {
-        //if had target, check if it died last round
-        if(target!=null)
-        {
-            try {
-                if(rc.getLocation().distanceTo(target.getLocation())<8)
-                    rc.senseRobot(target.getID());
-            }
-            catch(Exception E) {
-                //if senseRobot throws an exception, robot is likely dead
-                //assuming it didn't move out of your sight range
-                if(target.getType().equals(RobotType.GARDENER))
-                   delete(gardenerList,target.getID());
-                if(target.getType().equals(RobotType.ARCHON))
-                    delete(archonList,target.getID());
-            }
-        }
-
+        System.out.println("Round "+rc.getRoundNum());
         //reset variables
         target=null;
         destination=null;
@@ -68,15 +52,18 @@ public class ScoutHunter extends Robot{
         //update sensed map
         int enemyIndex=processEnemyInfo();
 
+        for(EnemyMemory asdf : gardenerList)
+        {
+            System.out.println(asdf.unitIDNumber);
+            System.out.println(asdf.unitIDNumber);
+        }
+
         //if there are gardeners in the sight range, target weakest gardener
         if(enemyIndex>=0) {
             target = sensedEnemies[enemyIndex];
             destination=target.getLocation();
             System.out.println("Destination = gardener in sight");
         }
-
-        //otherwise, target archons in sight radius
-
 
         //otherwise get destination from memory
         if ( destination==null) {
@@ -128,17 +115,6 @@ public class ScoutHunter extends Robot{
         }
     }
 
-    public void delete(ArrayList<EnemyMemory> list, int unitID)
-    {
-        for (EnemyMemory rememberedRobot : list) {
-            if (rememberedRobot.unitIDNumber==unitID)
-            {
-                list.remove(rememberedRobot);
-                break;
-            }
-        }
-    }
-
     public MapLocation getStartingLocationToCheck()
     {
         MapLocation closestLocation=null;
@@ -146,7 +122,7 @@ public class ScoutHunter extends Robot{
         for(int i=0; i<enemyArchonStartingLocations.length; i++)
         {
 
-            if (!checkedArchonStartLocations[i] )
+            if (!checkedArchonStartLocations[i] );
             {
                 float distanceToStartLocation=rc.getLocation().distanceTo(enemyArchonStartingLocations[i]);
                 if (distanceToStartLocation<distToClosestLocation) {
@@ -208,21 +184,14 @@ public class ScoutHunter extends Robot{
 
     public int processEnemyInfo()
     {
-        int gardenerCount=0;
         int weakestGardenerIndex=-1;
-        float weakestGardenerHealth=1000;
-
-        int archonCount=0;
-        int weakestArchonIndex=-1;
-        float weakestArchonHealth=1000;
-
         int currentIndex=0;
+        float weakestGardenerHealth=1000;
         boolean alreadySeen;
 
         if(sensedEnemies.length>0) {
             for (RobotInfo sensedRobot : sensedEnemies) {
                 if (sensedRobot.type.equals(RobotType.GARDENER)) {
-                    gardenerCount++;
                     if(sensedRobot.health<weakestGardenerHealth) {
                         weakestGardenerIndex = currentIndex;
                         weakestGardenerHealth=(float)sensedRobot.health;
@@ -241,11 +210,6 @@ public class ScoutHunter extends Robot{
 
                 }
                 if (sensedRobot.type.equals(RobotType.ARCHON)) {
-                    archonCount++;
-                    if(sensedRobot.health<weakestArchonHealth) {
-                        weakestArchonIndex=currentIndex;
-                        weakestArchonHealth=(float)sensedRobot.health;
-                    }
                     alreadySeen=false;
                     for (EnemyMemory rememberedRobot : archonList) {
                         if (sensedRobot.getID() == rememberedRobot.unitIDNumber)
@@ -261,9 +225,6 @@ public class ScoutHunter extends Robot{
                 currentIndex++;
             }
         }
-        if(gardenerCount>0)
-            return weakestGardenerIndex;
-        else
-            return weakestArchonIndex;
+        return weakestGardenerIndex;
     }
 }

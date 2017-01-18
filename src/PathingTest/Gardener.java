@@ -1,4 +1,5 @@
-package MeowPlayer;
+package PathingTest;
+import MeowMovement.Journey;
 import Utilities.Utils;
 import battlecode.common.*;
 
@@ -10,6 +11,9 @@ public class Gardener extends Robot{
     private boolean[] treePlanted;
     private final float groveRadius = GameConstants.BULLET_TREE_RADIUS + rc.getType().bodyRadius;
     private MapLocation groveCenter = null;
+    //private MapLocation destination = new MapLocation(424,400);
+    private MapLocation destination = new MapLocation(355,275);
+    private Journey journey = new Journey(rc,destination);
 
     public Gardener(RobotController rc) throws GameActionException {
         super(rc);
@@ -26,34 +30,7 @@ public class Gardener extends Robot{
 
     @Override
     public void runOneTurn() throws GameActionException {
-        if(groveCenter != null)
-        {
-            if(rc.getLocation().isWithinDistance(groveCenter, 0.01f))
-            {
-                // build trees and water
-                buildHex(0);
-                waterTrees();
-            }
-            else
-            {
-                // walk towards the grove!
-                if(rc.canMove(groveCenter)){
-                    rc.move(groveCenter);
-                }
-                else {
-                    tryMove(rc.getLocation().directionTo(groveCenter));
-                }
-            }
-        }
-        else {
-            if(!findGoodGroveSpot()) {
-                tryMove(Utils.randomDirection());
-            }
-        }
-
-        if(rc.getTeamBullets()>80 && rc.canBuildRobot(RobotType.SCOUT, Direction.getEast()) && shouldBuildScout()) {
-            rc.buildRobot(RobotType.SCOUT, Direction.getEast());
-        }
+        journey.moveTowardsDestinationAndDontStopBelievin();
     }
 
     private boolean shouldBuildScout() throws GameActionException {

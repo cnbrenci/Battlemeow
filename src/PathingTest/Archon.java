@@ -1,4 +1,4 @@
-package MeowPlayer;
+package PathingTest;
 import Utilities.Utils;
 import battlecode.common.*;
 
@@ -21,12 +21,13 @@ public class Archon extends Robot{
         Direction dir = Utils.randomDirection();
 
         // Randomly attempt to build a gardener in this direction
-        if (rc.canHireGardener(dir) && shouldHireGardener()) {
+        if (rc.canHireGardener(dir) && numGardenersHired==0 ) {
             rc.hireGardener(dir);
             numGardenersHired++;
         }
+        rc.disintegrate();
 
-        tryMove(Utils.randomDirection());
+        //tryMove(Utils.randomDirection());
         // Broadcast archon's location for other robots on the team to know
         //MapLocation myLocation = rc.getLocation();
         //rc.broadcast(0,(int)myLocation.x);
