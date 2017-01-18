@@ -25,6 +25,7 @@ public strictfp class RobotPlayer {
                     break;
                 case GARDENER:
                     Gardener gardener = new Gardener(rc);
+                    //PathTester gardener = new PathTester(rc);
                     gardener.run();
                     break;
                 case SOLDIER:

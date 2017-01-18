@@ -3,11 +3,11 @@ import battlecode.common.*;
 
 public class EnemyMemory
 {
-    static MapLocation lastLocation;
-    static float lastHealth;
-    static int turnSeen;
-    static int unitIDNumber;
-    static RobotType unitType;
+    MapLocation lastLocation;
+    float lastHealth;
+    int turnSeen;
+    int unitIDNumber;
+    RobotType unitType;
 
     public EnemyMemory(RobotInfo sensedInfo,int turn)
     {
