@@ -52,6 +52,12 @@ public class Messenger {
         final private static int SOLDIERS_CREATED = 17;
         final private static int SCOUTS_CREATED = 18;
         final private static int TANKS_CREATED = 19;
+
+        final private static int targetGardenerID=20;
+        final private static int targetGardenerHealth=21;
+        final private static int targetGardenerX=22;
+        final private static int targetGardenerY=23;
+        final private static int targetGardenerTurnSeen=24;
     }
 
     private static void InitOncePerGame(RobotController rc) throws GameActionException {
@@ -143,4 +149,37 @@ public class Messenger {
     public static int getScoutsCreatedCount(RobotController rc) throws GameActionException {
         return rc.readBroadcast(Channels.SCOUTS_CREATED);
     }
+
+    public static int getTargetGardenerID(RobotController rc) throws GameActionException {
+        return rc.readBroadcast(Channels.targetGardenerID);
+    }
+    public static int getTargetGardenerHealth(RobotController rc) throws GameActionException {
+        return rc.readBroadcast(Channels.targetGardenerHealth);
+    }
+    public static int getTargetGardenerX(RobotController rc) throws GameActionException {
+        return rc.readBroadcast(Channels.targetGardenerX);
+    }
+    public static int getTargetGardenerY(RobotController rc) throws GameActionException {
+        return rc.readBroadcast(Channels.targetGardenerY);
+    }
+    public static int getTargetGardenerTurnSeen(RobotController rc) throws GameActionException {
+        return rc.readBroadcast(Channels.targetGardenerTurnSeen);
+    }
+
+    public static void setTargetGardenerID(RobotController rc, int ID) throws GameActionException {
+        rc.broadcast(Channels.targetGardenerID,ID);
+    }
+    public static void setTargetGardenerHealth(RobotController rc,int health) throws GameActionException {
+        rc.broadcast(Channels.targetGardenerHealth,health);
+    }
+    public static void setTargetGardenerX(RobotController rc,int x) throws GameActionException {
+        rc.broadcast(Channels.targetGardenerX,x);
+    }
+    public static void setTargetGardenerY(RobotController rc,int y) throws GameActionException {
+        rc.broadcast(Channels.targetGardenerY,y);
+    }
+    public static void setTargetGardenerTurnSeen(RobotController rc,int turn) throws GameActionException {
+        rc.broadcast(Channels.targetGardenerTurnSeen,turn);
+    }
+
 }

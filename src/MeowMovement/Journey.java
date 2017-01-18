@@ -70,7 +70,7 @@ public class Journey {
             // if we can move there (ie: not blocked) and the location hasn't been added to the blockedlist
             if (rc.canMove(tmploc) && !blockedlist.contains(adjacentSpaces[i])) {
                 distances[i] = Math.sqrt(Math.pow(tmploc.x - destination.x, 2) + Math.pow(tmploc.y - destination.y, 2));
-                if (distances[i] < 3.5) {
+                if (distances[i] < 2) {
                     System.out.println("destination reached");
                     destinationReached = true;
                     return destinationReached;
