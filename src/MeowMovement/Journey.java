@@ -36,6 +36,7 @@ public class Journey {
     }
 
     public Journey(RobotController rc, MapLocation dest, int degOfMotion) {
+        this.rc=rc;
         previous = rc.getLocation();
         destination = dest;
         degreesOfMotion = degOfMotion;
@@ -66,12 +67,12 @@ public class Journey {
         // loop through all the adjacent spaces and calculate their MapLocations
         for (int i = 0; i < adjacentSpaces.length; i++) {
             //MapLocation tmploc = rc.getLocation().add((i) * (float) Math.PI / (degrees_of_motion / 2));
-            MapLocation tmploc = rc.getLocation().add((i) * (float) Math.PI / (degreesOfMotion / 2), 1);
+            MapLocation tmploc = rc.getLocation().add((i) * (float) Math.PI / (degreesOfMotion / 2), rc.getType().strideRadius);
             adjacentSpaces[i] = tmploc;
             // if we can move there (ie: not blocked) and the location hasn't been added to the blockedlist
             if (rc.canMove(tmploc) && !blockedlist.contains(adjacentSpaces[i])) {
                 distances[i] = Math.sqrt(Math.pow(tmploc.x - destination.x, 2) + Math.pow(tmploc.y - destination.y, 2));
-                if (distances[i] < 3.5) {
+                if (distances[i] < 2) {
                     System.out.println("destination reached");
                     destinationReached = true;
                     return destinationReached;
