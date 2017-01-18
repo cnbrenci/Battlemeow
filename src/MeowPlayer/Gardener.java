@@ -1,4 +1,5 @@
 package MeowPlayer;
+import MeowMovement.Journey;
 import Utilities.Utils;
 import battlecode.common.*;
 
@@ -7,9 +8,15 @@ import battlecode.common.*;
  */
 public class Gardener extends Robot{
     private Direction[] hexDir = new Direction[6];
-    private boolean[] treePlanted;
-    private final float groveRadius = GameConstants.BULLET_TREE_RADIUS + rc.getType().bodyRadius;
+    private float groveRadius = GameConstants.BULLET_TREE_RADIUS + rc.getType().bodyRadius + 2f;
+    private final float lastResortGroveRadius = GameConstants.BULLET_TREE_RADIUS + rc.getType().bodyRadius;
     private MapLocation groveCenter = null;
+    private MapLocation mamaArchonLoc;
+    private Journey journeyTowardsGroveCenter = null;
+    private Journey journeyAwayFromMamaArchon = null;
+    Direction awayFromMamaArchon;
+    private final float DISTANCE_PER_JOURNEY = 10f;
+    private int journeysToFindGrove = 0;
 
     public Gardener(RobotController rc) throws GameActionException {
         super(rc);
@@ -22,6 +29,9 @@ public class Gardener extends Robot{
         hexDir[3]= hexDir[0].rotateLeftDegrees(180);
         hexDir[4]= hexDir[0].rotateLeftDegrees(240);
         hexDir[5]= hexDir[0].rotateLeftDegrees(300);
+
+        mamaArchonLoc = Utils.findNearbyFriendlyArchon_OrNull(rc).location;
+        awayFromMamaArchon = mamaArchonLoc.directionTo(rc.getLocation());
     }
 
     @Override
@@ -41,23 +51,36 @@ public class Gardener extends Robot{
                     rc.move(groveCenter);
                 }
                 else {
-                    tryMove(rc.getLocation().directionTo(groveCenter));
+                    if(journeyTowardsGroveCenter == null)
+                        journeyTowardsGroveCenter = new Journey(rc, groveCenter);
+                    journeyTowardsGroveCenter.moveTowardsDestinationAndDontStopBelievin();
                 }
             }
         }
         else {
+            // todo: check for neutral trees nearby so we can decide whether we need some lumberjacks
+
             if(!findGoodGroveSpot()) {
-                tryMove(Utils.randomDirection());
+                if(journeyAwayFromMamaArchon == null || journeyAwayFromMamaArchon.haveReachedDestination()) {
+                    journeyAwayFromMamaArchon = new Journey(rc, rc.getLocation().add(awayFromMamaArchon, DISTANCE_PER_JOURNEY));
+                    if(++journeysToFindGrove>5) groveRadius = lastResortGroveRadius;
+                }
+
+                journeyAwayFromMamaArchon.moveTowardsDestinationAndDontStopBelievin();
             }
         }
 
-        if(rc.getTeamBullets()>80 && rc.canBuildRobot(RobotType.SCOUT, Direction.getEast()) && shouldBuildScout()) {
+        if(rc.canBuildRobot(RobotType.SCOUT, Direction.getEast()) && shouldBuildScout()) {
             rc.buildRobot(RobotType.SCOUT, Direction.getEast());
         }
     }
 
     private boolean shouldBuildScout() throws GameActionException {
-        if(Messenger.getScoutsCreatedCount(rc) > 10 && rc.getRobotCount() > 12) {
+        int numScoutsCreated = Messenger.getScoutsCreatedCount(rc);
+        if(numScoutsCreated > 3 && rc.getTeamBullets() < 180) {
+            return false;
+        }
+        if(numScoutsCreated > 16 && rc.getRobotCount() > 12) {
             return false;
         }
 

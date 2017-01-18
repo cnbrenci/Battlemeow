@@ -36,6 +36,7 @@ public class Journey {
     }
 
     public Journey(RobotController rc, MapLocation dest, int degOfMotion) {
+        this.rc = rc;
         previous = rc.getLocation();
         destination = dest;
         degreesOfMotion = degOfMotion;
@@ -52,7 +53,6 @@ public class Journey {
     public boolean moveTowardsDestinationAndDontStopBelievin() throws GameActionException {
         if(destinationReached)
             return true;
-
         // MapLocation targetpos = new MapLocation((float) 157, (float) 486); // movement_test2
         //MapLocation targetpos = new MapLocation((float) 424, (float) 400); // TreeMap
         //MapLocation targetpos = new MapLocation((float) 253, (float) 311); // TreeMap2
@@ -62,11 +62,10 @@ public class Journey {
         double mindist = 999;
         int minloc = 0;
         int deadendcounter = 0;
-
         // loop through all the adjacent spaces and calculate their MapLocations
         for (int i = 0; i < adjacentSpaces.length; i++) {
             //MapLocation tmploc = rc.getLocation().add((i) * (float) Math.PI / (degrees_of_motion / 2));
-            MapLocation tmploc = rc.getLocation().add((i) * (float) Math.PI / (degreesOfMotion / 2), 1);
+            MapLocation tmploc = rc.getLocation().add((i) * (float) Math.PI / (degreesOfMotion / 2), rc.getType().strideRadius);
             adjacentSpaces[i] = tmploc;
             // if we can move there (ie: not blocked) and the location hasn't been added to the blockedlist
             if (rc.canMove(tmploc) && !blockedlist.contains(adjacentSpaces[i])) {
@@ -85,7 +84,7 @@ public class Journey {
                 mindist = distances[i];
                 minloc = i;
             }
-            System.out.println("dist " + i + ": " + distances[i]);
+            //System.out.println("dist " + i + ": " + distances[i]);
         }
 
 

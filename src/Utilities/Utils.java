@@ -43,4 +43,31 @@ public class Utils {
         }
         return null;
     }
+
+    public static MapLocation getMapMidpoint(RobotController rc)
+    {
+        return getAverageLocation(new MapLocation[] {
+                getAverageLocation(rc.getInitialArchonLocations(rc.getTeam())),
+                getAverageLocation(rc.getInitialArchonLocations(rc.getTeam().opponent()))} );
+    }
+
+    public static MapLocation getAverageLocation(MapLocation[] locations)
+    {
+        float xSum = 0, ySum = 0;
+        for(MapLocation loc : locations)
+        {
+            xSum += loc.x;
+            ySum += loc.y;
+        }
+        return new MapLocation(xSum / locations.length, ySum / locations.length);
+    }
+
+    public static RobotInfo findNearbyFriendlyArchon_OrNull(RobotController rc) {
+        RobotInfo[] robots = rc.senseNearbyRobots(-1, rc.getTeam());
+        for(RobotInfo robot : robots) {
+            if(robot.type == RobotType.ARCHON)
+                return robot;
+        }
+        return null;
+    }
 }

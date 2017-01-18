@@ -1,4 +1,5 @@
 package MeowPlayer;
+import Utilities.Utils;
 import battlecode.common.*;
 
 /**
@@ -180,30 +181,10 @@ public class Scout extends Robot{
         ourArchonStartingLocations=rc.getInitialArchonLocations(rc.getTeam());
         enemyArchonStartingLocations=rc.getInitialArchonLocations(rc.getTeam().opponent());
 
-        //average starting locations for each team, get single location to compare between teams
-        float enemyTeamXAvg=0,enemyTeamYAvg=0,ourTeamXAvg=0,ourTeamYAvg=0;
-        for(MapLocation startingLocation : ourArchonStartingLocations)
-        {
-            System.out.println("Our Archon Starting Locations: "+startingLocation.x+","+startingLocation.y);
-            ourTeamXAvg+=startingLocation.x;
-            ourTeamYAvg+=startingLocation.y;
-        }
-        ourTeamXAvg/=ourArchonStartingLocations.length;
-        ourTeamYAvg/=ourArchonStartingLocations.length;
-        for(MapLocation startingLocation : enemyArchonStartingLocations)
-        {
-            System.out.println("Enemy Archon Starting Locations: "+startingLocation.x+","+startingLocation.y);
-            enemyTeamXAvg+=startingLocation.x;
-            enemyTeamYAvg+=startingLocation.y;
-        }
-        enemyTeamXAvg/=enemyArchonStartingLocations.length;
-        enemyTeamYAvg/=enemyArchonStartingLocations.length;
-        midpoint=new MapLocation((ourTeamXAvg+enemyTeamXAvg)/2,(ourTeamYAvg+enemyTeamYAvg)/2);
-        System.out.println("Map Midpoint: "+midpoint.x+","+midpoint.y);
-        //head in direction from middle to our average archon (away from enemy)
-        //Direction initialDirection=new Direction(ourTeamXAvg-midpoint.x,ourTeamYAvg-midpoint.y);
-        //head in direction from middle to our starting location
-        Direction initialDirection=new Direction(rc.getLocation().x-midpoint.x,rc.getLocation().y-midpoint.y);
-        return initialDirection;
+        midpoint = Utils.getAverageLocation(
+                new MapLocation[] {Utils.getAverageLocation(ourArchonStartingLocations), Utils.getAverageLocation(enemyArchonStartingLocations)} );
+        return new Direction(rc.getLocation().x-midpoint.x,rc.getLocation().y-midpoint.y);
     }
+
+
 }
