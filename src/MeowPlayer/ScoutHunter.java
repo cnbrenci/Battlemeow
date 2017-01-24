@@ -14,6 +14,14 @@ public class ScoutHunter extends Robot{
     int timeRange=20;
     int distRange=30;
 
+    int enemyIndex=0;
+    int gardenerCount=0;
+    int archonCount=0;
+    int otherCount=0;
+    int weakestGardenerIndex=-1;
+    int weakestArchonIndex=-1;
+    int weakestOtherIndex=-1;
+
     boolean killedTarget=false;
     boolean[] checkedArchonStartLocations;
 
@@ -88,13 +96,17 @@ public class ScoutHunter extends Robot{
         //reset variables
         target=null;
         destination=null;
+        enemyIndex=-1;
+        gardenerCount=0;
+        otherCount=0;
+        archonCount=0;
 
         //sense units
         sensedEnemies = rc.senseNearbyRobots(-1,enemy);
         sensedAllies = rc.senseNearbyRobots(-1,rc.getTeam());
 
         //update sensed map
-        int enemyIndex=processEnemyInfo();
+        processEnemyInfo();
 
         //if called for help, go help
         //to do
@@ -102,6 +114,8 @@ public class ScoutHunter extends Robot{
         //if there are gardeners in the sight range, target weakest gardener
         //else, target the weakest non-gardener non-archon
         //else, target the weakest archon
+        if (gardenerCount>0)
+            enemyIndex=weakestGardenerIndex;
         if(enemyIndex>=0) {
             target = sensedEnemies[enemyIndex];
             if(target.getType().equals(RobotType.GARDENER)) {
@@ -152,6 +166,28 @@ public class ScoutHunter extends Robot{
             destination = getArchonFromMemory();
             if(destination != null)
                 System.out.println("Destination = archon from memory");
+        }
+
+        //otherwise target nearest non-archon, non-gardener
+        if(target==null && destination==null) {
+            if (otherCount>0) {
+                enemyIndex=weakestOtherIndex;
+                target = sensedEnemies[enemyIndex];
+                destination=target.getLocation();
+            }
+            if(destination!=null)
+                System.out.println("Destination = weakest combat unit");
+        }
+
+        //otherwist target nearest archon
+        if(target==null && destination==null) {
+            if(archonCount>0) {
+                enemyIndex=weakestArchonIndex;
+                target=sensedEnemies[enemyIndex];
+                destination=target.getLocation();
+            }
+            if(destination!=null)
+                System.out.println("Destination = weakest archon");
         }
 
         //spread out by heading away from allied units in range
@@ -294,18 +330,18 @@ public class ScoutHunter extends Robot{
         }
     }
 
-    public int processEnemyInfo()
+    public void processEnemyInfo()
     {
-        int gardenerCount=0;
-        int weakestGardenerIndex=-1;
+        gardenerCount=0;
+        weakestGardenerIndex=-1;
         float weakestGardenerHealth=1000;
 
-        int archonCount=0;
-        int weakestArchonIndex=-1;
+        archonCount=0;
+        weakestArchonIndex=-1;
         float weakestArchonHealth=1000;
 
-        int otherCount=0;
-        int otherIndex=-1;
+        otherCount=0;
+        weakestOtherIndex=-1;
         float otherHealth=1000;
 
         int currentIndex=0;
@@ -354,23 +390,12 @@ public class ScoutHunter extends Robot{
                 {
                     otherCount++;
                     if(sensedRobot.health<otherHealth) {
-                        otherIndex=currentIndex;
+                        weakestOtherIndex=currentIndex;
                         otherHealth=(float)sensedRobot.health;
                     }
                 }
                 currentIndex++;
             }
         }
-        if(gardenerCount>0)
-            return weakestGardenerIndex;
-        else
-            if(otherCount>0)
-                return otherIndex;
-            else
-                if(archonCount>0)
-                    return weakestArchonIndex;
-                else
-                    return -1;
-
     }
 }

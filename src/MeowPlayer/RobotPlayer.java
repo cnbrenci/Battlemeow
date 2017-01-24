@@ -24,7 +24,7 @@ public strictfp class RobotPlayer {
                     archon.run();
                     break;
                 case GARDENER:
-                    Gardener gardener = new Gardener(rc);
+                    WanderingGardener gardener = new WanderingGardener(rc);
                     //PathTester gardener = new PathTester(rc);
                     gardener.run();
                     break;

@@ -1,5 +1,5 @@
 package MeowPlayer;
-import MeowMovement.Journey;
+import MeowMovement.*;
 import Utilities.Utils;
 import battlecode.common.*;
 
@@ -14,6 +14,8 @@ public class Archon extends Robot{
     private Journey neverWalkAway;
     private boolean isBobTheBuilder;
 
+    private PathPlanner2 test;
+
     public Archon(RobotController rc) throws GameActionException {
         super(rc);
         awayFromCenter = Utils.getMapMidpoint(rc).directionTo(rc.getLocation());
@@ -22,12 +24,20 @@ public class Archon extends Robot{
             isBobTheBuilder = true;
         }
 
-        neverWalkAway = new Journey(rc, rc.getLocation().add(awayFromCenter, 20));
+        //neverWalkAway = new Journey(rc, rc.getLocation().add(awayFromCenter, 20));
+        //test = new PathPlanner2(rc,rc.getInitialArchonLocations(rc.getTeam().opponent())[0]);
+
     }
 
     @Override
     public void runOneTurn() throws GameActionException {
         // Try to walk away from the map midpoint
+        //test.move();
+        if(rc.canHireGardener(awayFromCenter.opposite())) {
+            rc.hireGardener(awayFromCenter.opposite());
+            rc.disintegrate();
+        }
+        /*
         neverWalkAway.moveTowardsDestinationAndDontStopBelievin();
         if(neverWalkAway.haveReachedDestination())
             neverWalkAway = new Journey(rc, rc.getLocation().add(awayFromCenter, 10));
@@ -41,7 +51,7 @@ public class Archon extends Robot{
             }
             numGardenersAttemptedToHire++;
         }
-
+        */
         //tryMove(Utils.randomDirection());
         // Broadcast archon's location for other robots on the team to know
         //MapLocation myLocation = rc.getLocation();

@@ -1,16 +1,30 @@
 package MeowMovement;
 
-import battlecode.common.MapLocation;
-
-/**
- * Created by Cassi on 1/16/2017.
- *
- * Unused currently. I think it'd be good to use an array of these instead of 2 arrays coordinating indexes
- * but I haven't replaced it yet.
- */
+import battlecode.common.*;
 public class PotentialMove {
-    MapLocation potentialMoveLocation;
-    double distanceToDestination;
-    public PotentialMove() {
+    private RobotController rc;
+
+    private MapLocation potentialMoveLocation;
+    private float distanceToDestination;
+    private boolean isOpen;
+
+    public PotentialMove(RobotController rc, MapLocation locationToCheck, MapLocation destination) {
+
+        this.rc = rc;
+        potentialMoveLocation=locationToCheck;
+        distanceToDestination=potentialMoveLocation.distanceTo(destination);
+        isOpen=rc.canMove(locationToCheck);
+    }
+    public boolean isOpen() {
+        return isOpen;
+    }
+    public float distanceToDestination() {
+        return distanceToDestination;
+    }
+    public MapLocation getLocation() {
+        return potentialMoveLocation;
+    }
+    public String toString() {
+        return "Location: "+potentialMoveLocation+", Distance To Destination: "+distanceToDestination;
     }
 }

@@ -70,4 +70,14 @@ public class Utils {
         }
         return null;
     }
+
+    public static void showVision(RobotController rc) throws GameActionException {
+        int linesToShow=8;
+        float deltaLines=360f/(float)linesToShow;
+        MapLocation robotCenter=rc.getLocation();
+        for(int i=0;i<deltaLines;i++) {
+            MapLocation visionEdge=rc.getLocation().add(Direction.getEast().rotateLeftDegrees(deltaLines*(float)i),rc.getType().sensorRadius);
+            rc.setIndicatorLine(robotCenter,visionEdge,0,0,0);
+        }
+    }
 }

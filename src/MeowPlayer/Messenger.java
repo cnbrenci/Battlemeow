@@ -58,6 +58,9 @@ public class Messenger {
         final private static int targetGardenerX=22;
         final private static int targetGardenerY=23;
         final private static int targetGardenerTurnSeen=24;
+
+        final private static int treeGridStartX=30;
+        final private static int treeGridStartY=31;
     }
 
     private static void InitOncePerGame(RobotController rc) throws GameActionException {
@@ -180,6 +183,19 @@ public class Messenger {
     }
     public static void setTargetGardenerTurnSeen(RobotController rc,int turn) throws GameActionException {
         rc.broadcast(Channels.targetGardenerTurnSeen,turn);
+    }
+
+    public static void setTreeGridStartX(RobotController rc, float x) throws GameActionException {
+        rc.broadcast(Channels.treeGridStartX,Float.floatToIntBits(x));
+    }
+    public static void setTreeGridStartY(RobotController rc, float y) throws GameActionException {
+        rc.broadcast(Channels.treeGridStartY,Float.floatToIntBits(y));
+    }
+    public static float getTreeGridStartX(RobotController rc) throws GameActionException {
+        return Float.intBitsToFloat(rc.readBroadcast(Channels.treeGridStartX));
+    }
+    public static float getTreeGridStartY(RobotController rc) throws GameActionException {
+        return Float.intBitsToFloat(rc.readBroadcast(Channels.treeGridStartY));
     }
 
 }
