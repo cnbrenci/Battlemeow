@@ -1,32 +1,12 @@
 package MeowPlayer;
 import Utilities.SimpleDirection;
-import Utilities.Utils;
 import battlecode.common.*;
 
-import static Utilities.SimpleDirection.*;
 
 /**
  * Created by Cassi on 1/13/2017.
  *
- * Index	Use
- * 0-9	Global Commands
- * 10-19	Map corners
- * 20-29	Unit ID counters
- * ?
- * 100-199	Unit map
- * 200-299	Tree map
- * 300-349	Allied Trees
- * 350-399	Neutral Trees
- * 400-449	Enemy Trees
- * 450-499	Allied Gardener
- * 500-549	Allied Scout
- * 550-599	Allied Soldier
- * 600-649	Allied Lumberjack
- * 650-699	Enemy Gardener
- * 700-749	Enemy Scout
- * 750-799	Enemy Soldier
- * 800-849	Enemy Lumberjack
- * 850-900	Bullet info
+ * Neutral trees - channels 100 - 2000
  *
  * For non-tree units, things to record:
  * UnitID (15 bits)
@@ -58,6 +38,185 @@ public class Messenger {
         final private static int targetGardenerX=22;
         final private static int targetGardenerY=23;
         final private static int targetGardenerTurnSeen=24;
+
+        final private static int NEUTRAL_TREE_LIST_LENGTH=100;
+        final private static int NEUTRAL_TREE_LIST_START=NEUTRAL_TREE_LIST_LENGTH+1;
+        final private static int NEUTRAL_TREE_MAX_CHANNEL=2000;
+    }
+
+    final private static class Offsets {
+        final private static int TREE_INDEX=7;
+        final private static int TREE_ID=0;
+        final private static int TREE_X=1;
+        final private static int TREE_Y=2;
+        final private static int TREE_NUMBULLETS=3;
+        final private static int TREE_ROBOTTYPE=4;
+        final private static int TREE_RADIUS=5;
+        final private static int TREE_HEALTH=6;
+    }
+
+
+    private static int robotTypeToInt(RobotType robotType) {
+        if(robotType == null) return 0;
+        switch(robotType) {
+            case ARCHON:
+                return Channels.ARCHONS_CREATED;
+            case GARDENER:
+                return Channels.GARDENERS_CREATED;
+            case LUMBERJACK:
+                return Channels.LUMBERJACKS_CREATED;
+            case SOLDIER:
+                return Channels.SOLDIERS_CREATED;
+            case TANK:
+                return Channels.TANKS_CREATED;
+            case SCOUT:
+                return Channels.SCOUTS_CREATED;
+            default:
+                return 0;
+        }
+    }
+
+    private static RobotType intToRobotType(int i) {
+        switch(i) {
+            case Channels.ARCHONS_CREATED:
+                return RobotType.ARCHON;
+            case Channels.GARDENERS_CREATED:
+                return RobotType.GARDENER;
+            case Channels.LUMBERJACKS_CREATED:
+                return RobotType.LUMBERJACK;
+            case Channels.SOLDIERS_CREATED:
+                return RobotType.SOLDIER;
+            case Channels.TANKS_CREATED:
+                return RobotType.TANK;
+            case Channels.SCOUTS_CREATED:
+                return RobotType.SCOUT;
+            default:
+                return null;
+        }
+    }
+
+    /*
+    Adds the given tree to our list of neutral trees
+    returns true if successfully added
+    returns false if the list of trees has reached max length (meaning we can't add it)
+     */
+    public static boolean recordNeutralTree(RobotController rc, TreeInfo tree) throws GameActionException {
+        int treeListLength = rc.readBroadcast(Channels.NEUTRAL_TREE_LIST_LENGTH);
+
+        // check to see if we already have this tree
+        if(treeListLength > 0) {
+            for(int i = 0; i < treeListLength; i++) {
+                int treeId = rc.readBroadcast(Channels.NEUTRAL_TREE_LIST_START + (Offsets.TREE_INDEX*i) + Offsets.TREE_ID);
+                if(treeId == tree.ID) {
+                    // we already have this tree! let's just update the values that could have changed.
+                    rc.broadcast(Channels.NEUTRAL_TREE_LIST_START + (Offsets.TREE_INDEX*i) + Offsets.TREE_NUMBULLETS, tree.getContainedBullets());
+                    rc.broadcast(Channels.NEUTRAL_TREE_LIST_START + (Offsets.TREE_INDEX*i) + Offsets.TREE_HEALTH, Float.floatToIntBits(tree.health));
+                    return true;
+                }
+            }
+        }
+        // insert at end
+        boolean success = copyTreeToIndex(rc, tree, treeListLength);
+        if(success) rc.broadcast(Channels.NEUTRAL_TREE_LIST_LENGTH, treeListLength+1);
+        return success;
+    }
+
+    private static boolean copyTreeToIndex(RobotController rc, TreeInfo tree, int index) throws GameActionException {
+        int channelToInsertAt = Channels.NEUTRAL_TREE_LIST_START + (Offsets.TREE_INDEX*index);
+        if(channelToInsertAt + Offsets.TREE_INDEX > Channels.NEUTRAL_TREE_MAX_CHANNEL) {
+            return false;
+        }
+
+        rc.broadcast(channelToInsertAt + Offsets.TREE_ID, tree.ID);
+        rc.broadcast(channelToInsertAt + Offsets.TREE_X, Float.floatToIntBits(tree.getLocation().x));
+        rc.broadcast(channelToInsertAt + Offsets.TREE_Y, Float.floatToIntBits(tree.getLocation().y));
+        rc.broadcast(channelToInsertAt + Offsets.TREE_NUMBULLETS, tree.getContainedBullets());
+        rc.broadcast(channelToInsertAt + Offsets.TREE_ROBOTTYPE, robotTypeToInt(tree.containedRobot));
+        rc.broadcast(channelToInsertAt + Offsets.TREE_RADIUS, Float.floatToIntBits(tree.radius));
+        rc.broadcast(channelToInsertAt + Offsets.TREE_HEALTH, Float.floatToIntBits(tree.health));
+        return true;
+    }
+
+    public static TreeInfo getClosestTree(RobotController rc, MapLocation loc) throws GameActionException {
+        return getClosestTree(rc, loc, false);
+    }
+
+    public static TreeInfo getClosestTree(RobotController rc, MapLocation loc, boolean mustContainRobot) throws GameActionException {
+        int treeListLength = rc.readBroadcast(Channels.NEUTRAL_TREE_LIST_LENGTH);
+
+        float minDist = 1000;
+        int minDistIndex = 0;
+        MapLocation minDistLoc = null;
+        // find the tree!!
+        if(treeListLength > 0) {
+            for(int i = 0; i < treeListLength; i++) {
+                if(mustContainRobot) {
+                    RobotType robotContained = intToRobotType(rc.readBroadcast(treeIndexChannel(i) + Offsets.TREE_ROBOTTYPE));
+                    if(robotContained == null) continue;
+                }
+
+                MapLocation treeLoc = getLocFromTreeAtIndex(rc, i);
+                float distance = loc.distanceTo(treeLoc);
+                if(distance < minDist) {
+                    minDist = distance;
+                    minDistIndex = i;
+                    minDistLoc = treeLoc;
+                }
+            }
+            // get the tree!!
+            if(minDistLoc != null) return getTreeAtIndex(rc, minDistIndex, minDistLoc);
+        }
+
+        return null;
+    }
+
+    public static TreeInfo getTreeAtIndex(RobotController rc, int index) throws GameActionException {
+        return getTreeAtIndex(rc, index, null);
+    }
+
+    private static TreeInfo getTreeAtIndex(RobotController rc, int index, MapLocation loc) throws GameActionException {
+        int id = rc.readBroadcast(treeIndexChannel(index) + Offsets.TREE_ID);
+        int numBullets = rc.readBroadcast(treeIndexChannel(index) + Offsets.TREE_NUMBULLETS);
+        RobotType robotType = intToRobotType(rc.readBroadcast(treeIndexChannel(index) + Offsets.TREE_ROBOTTYPE));
+        float radius = Float.intBitsToFloat(rc.readBroadcast(treeIndexChannel(index) + Offsets.TREE_RADIUS));
+        float health = Float.intBitsToFloat(rc.readBroadcast(treeIndexChannel(index) + Offsets.TREE_HEALTH));
+        if(loc == null) loc = getLocFromTreeAtIndex(rc, index);
+        return new TreeInfo(id, Team.NEUTRAL, loc, radius, health, numBullets, robotType);
+    }
+
+    private static int treeIndexChannel(int i) {
+        return Channels.NEUTRAL_TREE_LIST_START + (Offsets.TREE_INDEX*i);
+    }
+
+    private static MapLocation getLocFromTreeAtIndex(RobotController rc, int index) throws GameActionException {
+        float treeX = Float.intBitsToFloat(rc.readBroadcast(treeIndexChannel(index) + Offsets.TREE_X));
+        float treeY = Float.intBitsToFloat(rc.readBroadcast(treeIndexChannel(index) + Offsets.TREE_Y));
+        return new MapLocation(treeX, treeY);
+    }
+
+    public static boolean deleteTree(RobotController rc, int id) throws GameActionException {
+        int treeListLength = rc.readBroadcast(Channels.NEUTRAL_TREE_LIST_LENGTH);
+
+        if(treeListLength <= 0) return false;
+        // find the tree!!
+        for (int i = 0; i < treeListLength; i++) {
+            if (rc.readBroadcast(treeIndexChannel(i) + Offsets.TREE_ID) == id) {
+                if (i != treeListLength - 1) {
+                    // this item isn't the last one in the list, so let's
+                    // copy the last item in the list into the place of deleted tree
+                    TreeInfo lastTree = getTreeAtIndex(rc, treeListLength - 1, null);
+                    if (!copyTreeToIndex(rc, lastTree, i)) {
+                        System.out.println("Failed to delete tree with id: " + id);
+                        return false;
+                    }
+                }
+
+                // delete the last item in the list
+                rc.broadcast(Channels.NEUTRAL_TREE_LIST_LENGTH, treeListLength - 1);
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void InitOncePerGame(RobotController rc) throws GameActionException {
@@ -181,5 +340,28 @@ public class Messenger {
     public static void setTargetGardenerTurnSeen(RobotController rc,int turn) throws GameActionException {
         rc.broadcast(Channels.targetGardenerTurnSeen,turn);
     }
+
+    // This is how to convert float to int and back without losing data, if we want to store accurate x,y coordinates.
+    public static void testStuff(){
+        float f = 12.5f;
+        int tointbits = Float.floatToIntBits(f);
+        int torawinbits = Float.floatToRawIntBits(f);
+        float back = Float.intBitsToFloat(tointbits);
+        float rawback = Float.intBitsToFloat(torawinbits);
+        System.out.println("float = " + f);
+        System.out.println("tointbits = " + tointbits);
+        System.out.println("torawintbits = " + torawinbits);
+        System.out.println("back = " + back);
+        System.out.println("rawback = " + rawback);
+        /*
+            float = 12.5
+            tointbits = 1095237632
+            torawintbits = 1095237632
+            back = 12.5
+            rawback = 12.5
+         */
+    }
+
+
 
 }

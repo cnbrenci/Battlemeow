@@ -367,7 +367,7 @@ public class ScoutHunter extends Robot{
             if(otherCount>0)
                 return otherIndex;
             else
-                if(archonCount>0)
+                if(archonCount>0 && rc.getRoundNum()>200)
                     return weakestArchonIndex;
                 else
                     return -1;
