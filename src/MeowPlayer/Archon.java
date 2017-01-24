@@ -77,7 +77,7 @@ public class Archon extends Robot{
             if(numGardenersHired == 0) return true;
         }
 
-        if(Messenger.getScoutsCreatedCount(rc) <= 2 || rc.getTeamBullets() < 140) return false;
+        if(Messenger.getScoutsCreatedCount(rc) <= 2 && rc.getTeamBullets() < 240) return false;
 
         int numArchons = rc.getInitialArchonLocations(rc.getTeam()).length;
         if(((double)numGardenersHired / (double)Messenger.getGardenersCreatedCount(rc) <= 1. / numArchons))

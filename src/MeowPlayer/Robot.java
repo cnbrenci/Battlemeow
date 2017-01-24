@@ -48,7 +48,7 @@ public class Robot {
 
     private boolean haveEnoughBulletsToWinByDonation()
     {
-        return (GameConstants.VICTORY_POINTS_TO_WIN - rc.getTeamVictoryPoints()) <= (rc.getTeamBullets() / 10);
+        return (GameConstants.VICTORY_POINTS_TO_WIN - rc.getTeamVictoryPoints()) <= (rc.getTeamBullets() / rc.getVictoryPointCost());
     }
 
     private boolean tryShakeTrees() throws GameActionException {

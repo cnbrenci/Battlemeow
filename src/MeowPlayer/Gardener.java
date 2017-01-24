@@ -63,9 +63,9 @@ public class Gardener extends Robot{
             if(!findGoodGroveSpot()) {
                 if(journeyAwayFromMamaArchon == null || journeyAwayFromMamaArchon.haveReachedDestination()) {
                     journeyAwayFromMamaArchon = new Journey(rc, rc.getLocation().add(awayFromMamaArchon, DISTANCE_PER_JOURNEY));
-                    if(++journeysToFindGrove>5) groveRadius = lastResortGroveRadius;
                 }
-
+                if(++journeysToFindGrove>5) groveRadius = lastResortGroveRadius;
+                if(journeysToFindGrove > 12) groveRadius = 0.5f;
                 journeyAwayFromMamaArchon.moveTowardsDestinationAndDontStopBelievin();
             }
         }
