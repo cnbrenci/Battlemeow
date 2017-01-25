@@ -7,6 +7,9 @@ public class WanderingGardener extends Robot{
     Messenger messageHandler=new Messenger();
     PathPlanner2 pathHandler;
 
+    //MapLocation soldierNode=null;
+    MapLocation soldierNode1=null,soldierNode2=null;
+
     MapLocation trackOpenNodeClosestToStart=null;
 
     MapLocation midpoint, currentLocation, initialTree;
@@ -76,24 +79,27 @@ public class WanderingGardener extends Robot{
             }
             else
             {
-                System.out.println("A");
                 findNodeClosestToStartingNode(allNodes);
                 if(trackOpenNodeClosestToStart != null)
                 {
-                    System.out.println("B");
                     //rc.setIndicatorDot(trackOpenNodeClosestToStart,0,0,0);
                     if(closeEnoughToPlant(trackOpenNodeClosestToStart)) {
-                        System.out.println("C");
                         boolean plantingWasSuccessful=tryToPlant(trackOpenNodeClosestToStart);
                         if(plantingWasSuccessful) {
-                            System.out.println("D");
-                            System.out.println("Planted at "+trackOpenNodeClosestToStart);
                             trackOpenNodeClosestToStart=null;
                             treeCounter++;
                         }
                     } else {
-                        System.out.println("E");
                         rc.setIndicatorLine(rc.getLocation(),trackOpenNodeClosestToStart,0,255,0);
+                        if(rc.canBuildRobot(RobotType.SOLDIER,rc.getLocation().directionTo(soldierNode1)) && rc.getTeamBullets()>250 ) {
+                            rc.buildRobot(RobotType.SOLDIER,rc.getLocation().directionTo(soldierNode1));
+                        }
+                        else
+                        {
+                            if(rc.canBuildRobot(RobotType.SOLDIER,rc.getLocation().directionTo(soldierNode2)) && rc.getTeamBullets()>250) {
+                                rc.buildRobot(RobotType.SOLDIER,rc.getLocation().directionTo(soldierNode2));
+                            }
+                        }
                         pathHandler.moveNear(trackOpenNodeClosestToStart,buildOffset);
                         //rc.setIndicatorDot(trackOpenNodeClosestToStart,0,255,0);
                     }
@@ -103,13 +109,11 @@ public class WanderingGardener extends Robot{
         } else {
             //move towards weakest tree
             if(weakestTree!=null) {
-                System.out.println("F");
                 rc.setIndicatorLine(rc.getLocation(),weakestTree.location,0,0,255);
                 pathHandler.moveNear(weakestTree.location, treeWaterDist);
                 rc.setIndicatorDot(weakestTree.location,0,0,255);
             }
         }
-        System.out.println("G");
         waterWeakestTreeInRange(allAlliedTrees);
 
         //draw dots
@@ -313,11 +317,18 @@ public class WanderingGardener extends Robot{
             //tempnode is a valid node, get other node
             node1=tempNode;
             node2=new MapLocation(tempx+deltaXToOtherNode,tempy+deltaYToOtherNode);
+
+            //soldierNode=node1;
+            soldierNode1=new MapLocation(tempx,tempy+deltaYToOtherNode);
+            soldierNode2=new MapLocation(tempx+deltaXToOtherNode,tempy);
         }
         else
         {
             node1=new MapLocation(tempx,tempy+deltaYToOtherNode);
             node2=new MapLocation(tempx+deltaXToOtherNode,tempy);
+            //soldierNode=node1;
+            soldierNode1=tempNode;
+            soldierNode2=new MapLocation(tempx+deltaXToOtherNode,tempy+deltaYToOtherNode);
         }
         rc.setIndicatorDot(node1.add(Direction.getEast(),0.2f),255,0,255);
         rc.setIndicatorDot(node2.add(Direction.getEast(),0.2f), 255,255,0);
