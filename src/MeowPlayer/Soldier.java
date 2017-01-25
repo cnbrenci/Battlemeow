@@ -1,4 +1,5 @@
 package MeowPlayer;
+import MeowMovement.PathPlanner2;
 import Utilities.Utils;
 import battlecode.common.*;
 
@@ -13,6 +14,8 @@ public class Soldier extends Robot{
             System.out.println("I'm the first Soldier on my team!");
     }
 
+    PathPlanner2 pathHandler;
+
     @Override
     public void runOneTurn() throws GameActionException {
         MapLocation myLocation = rc.getLocation();
@@ -26,12 +29,14 @@ public class Soldier extends Robot{
             {
                 int targetId;
 
+                // check if each one is a gardener
                 if (robot.getType() == RobotType.GARDENER)
                 {
                     rc.move(robot.getLocation().directionTo(robot.location));
                     if (rc.canFireSingleShot()) {
                         // ...Then fire a bullet in the direction of the enemy.
                         rc.fireSingleShot(rc.getLocation().directionTo(robot.location));
+
                     }
                 }
             }
@@ -39,6 +44,39 @@ public class Soldier extends Robot{
             if (rc.canFireSingleShot()) {
                 // ...Then fire a bullet in the direction of the enemy.
                 rc.fireSingleShot(rc.getLocation().directionTo(robots[0].location));
+            }
+        }
+
+
+        boolean isFirstSoldier = false;
+        MapLocation[] EnemyArchonLocations = rc.getInitialArchonLocations(enemy);
+
+        // Check if this is the first soldier
+        if (Messenger.getSoldiersCreatedCount(rc) == 1)
+        {
+            isFirstSoldier = true;
+        }
+
+        // if so, rush!
+        if (isFirstSoldier)
+        {
+            // If there's only one enemy Archon, try to move to it
+            if (EnemyArchonLocations.length == 1)
+            {
+                pathHandler.move(EnemyArchonLocations[0]);
+            }
+            // if there are multiple archons, find the closest one and try to move to it
+            else
+            {
+                float distanceToArchon = 1000000000;
+                for (MapLocation EnenmyArchonLocation : EnemyArchonLocations)
+                {
+                    if (rc.getLocation().distanceTo(EnenmyArchonLocation) < distanceToArchon)
+                    {
+                        distanceToArchon = rc.getLocation().distanceTo(EnenmyArchonLocation);
+                    }
+                    pathHandler.move(EnenmyArchonLocation);
+                }
             }
         }
 
