@@ -41,6 +41,7 @@ public class Messenger {
 
         final private static int treeGridStartX=30;
         final private static int treeGridStartY=31;
+        final private static int hasFirstTreeBeenPlanted=32;
 
         final private static int NEUTRAL_TREE_LIST_LENGTH=100;
         final private static int NEUTRAL_TREE_LIST_START=NEUTRAL_TREE_LIST_LENGTH+1;
@@ -364,6 +365,14 @@ public class Messenger {
     public static float getTreeGridStartY(RobotController rc) throws GameActionException {
         return Float.intBitsToFloat(rc.readBroadcast(Channels.treeGridStartY));
     }
+
+    public static void setHasFirstTreeBeenPlanted(RobotController rc, int hasFirstTreeBeenBuilt) throws GameActionException {
+        rc.broadcast(Channels.hasFirstTreeBeenPlanted,hasFirstTreeBeenBuilt);
+    }
+    public static int getHasFirstTreeBeenPlanted(RobotController rc) throws GameActionException {
+        return rc.readBroadcast(Channels.hasFirstTreeBeenPlanted);
+    }
+
 
     // This is how to convert float to int and back without losing data, if we want to store accurate x,y coordinates.
     public static void testStuff(){
