@@ -35,7 +35,7 @@ public class Archon extends Robot{
         //test.move();
         if(rc.canHireGardener(awayFromCenter.opposite())) {
             rc.hireGardener(awayFromCenter.opposite());
-            rc.disintegrate();
+            //rc.disintegrate();
         }
         /*
         neverWalkAway.moveTowardsDestinationAndDontStopBelievin();

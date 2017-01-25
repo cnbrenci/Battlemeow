@@ -3,6 +3,8 @@ package MeowMovement;
 import battlecode.common.*;
 import Utilities.*;
 
+import javax.management.monitor.GaugeMonitor;
+
 public class PathPlanner2 {
     private RobotController rc;
 
@@ -18,7 +20,7 @@ public class PathPlanner2 {
     Direction directionToDestination;
 
     int stuckCounter=0;
-    int degreesOfMotion=32;
+    int degreesOfMotion=16;
 
     float angleDelta;
     float stepSize;
@@ -32,6 +34,7 @@ public class PathPlanner2 {
         this.currentLocation=rc.getLocation();
         this.lastLocation=rc.getLocation();
     }
+
     public void backtrack() throws GameActionException {
         //initially checks 90 deg left and right
         //if finds nothing, checks more
@@ -47,10 +50,12 @@ public class PathPlanner2 {
         if(nextLocation==null) {
             //didn't find any potential moves (completely encircled)
             stuckCounter++;
-            if ( stuckCounter==degreesOfMotion/2)
+            if ( stuckCounter==degreesOfMotion)
                 stuck=true;
+            rc.disintegrate();
         }
     }
+
     public boolean isFree() {
         boolean isFree=false;
         if(Math.abs(currentLocation.directionTo(nextLocation).degreesBetween(directionToDestination))<angleDelta)
