@@ -12,6 +12,7 @@ public class Soldier extends Robot{
         super(rc);
         if(Messenger.incrementSoldiersCreatedCount(rc) == 1)
             System.out.println("I'm the first Soldier on my team!");
+        pathHandler = new PathPlanner2(rc);
     }
 
     PathPlanner2 pathHandler;

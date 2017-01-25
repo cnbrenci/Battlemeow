@@ -32,6 +32,7 @@ public class WanderingGardener extends Robot{
     }
     public void runOneTurn() throws GameActionException {
         currentLocation=rc.getLocation();
+        buildBitches();
         doGardenerStuff();
     }
 
@@ -399,6 +400,39 @@ public class WanderingGardener extends Robot{
         }
         isFirstTree=false;
         */
+    }
+
+    private void buildBitches() throws GameActionException {
+        if(Messenger.getScoutsCreatedCount(rc) < 1) {
+            buildRobot(RobotType.SCOUT);
+        }
+
+        if(Messenger.getLumberjacksCreatedCount(rc) < 1) {
+            buildRobot(RobotType.LUMBERJACK);
+        }
+
+        if(Messenger.getSoldiersCreatedCount(rc) < 1) {
+            buildRobot(RobotType.SOLDIER);
+        }
+    }
+
+    private Direction getRobotBuildDirection(RobotType robotType)
+    {
+        Direction angleToCenter = rc.getLocation().directionTo(Utils.getMapMidpoint(rc));
+        if(rc.canBuildRobot(robotType, angleToCenter)) return angleToCenter;
+        if(rc.canBuildRobot(robotType, angleToCenter.rotateLeftDegrees(15f))) return angleToCenter.rotateLeftDegrees(15f);
+        if(rc.canBuildRobot(robotType, angleToCenter.rotateRightDegrees(15f))) return angleToCenter.rotateRightDegrees(15f);
+
+        for (float deg = 1; deg < 360; deg+=5) {
+            if(rc.canBuildRobot(robotType, angleToCenter.rotateLeftDegrees(deg))) return angleToCenter.rotateLeftDegrees(deg);
+        }
+        return angleToCenter;
+    }
+
+    private void buildRobot(RobotType robotType) throws GameActionException {
+        Direction dir = getRobotBuildDirection(robotType);
+        if(rc.canBuildRobot(robotType, dir))
+            rc.buildRobot(robotType, dir);
     }
 
 }

@@ -122,6 +122,7 @@ public class Scout extends Robot{
             {
                 //attempt full stride in travel direction
                 rc.move(travelDirection);
+                return true;
             }
             else
             {
