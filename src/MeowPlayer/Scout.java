@@ -23,10 +23,13 @@ public class Scout extends Robot{
 
     @Override
     public void runOneTurn() throws GameActionException {
-        setMapDimensions();
-        System.out.println("First Direction: "+firstDirection+", Second Direction: "+secondDirection);
-        if ( rc.getRoundNum()>200)
-            rc.disintegrate();
+        //setMapDimensions();
+        //System.out.println("First Direction: "+firstDirection+", Second Direction: "+secondDirection);
+        // zoom around and collect info!
+        if(!travelTowardEdge(currentDirection)) {
+            // we must be blocked! get a new direction!
+            currentDirection = Utils.randomDirection();
+        }
     }
 
     private void setMapDimensions() throws GameActionException

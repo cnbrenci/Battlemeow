@@ -8,6 +8,7 @@ import battlecode.common.*;
 public class Robot {
     protected RobotController rc;
     protected Team enemy;
+    protected TreeInfo[] treesFromLastTurn = new TreeInfo[] {};
 
     protected Robot(RobotController rc){
         this.rc = rc;
@@ -28,6 +29,7 @@ public class Robot {
                 runOneTurn();
 
                 tryShakeTrees();
+                recordTrees();
 
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
                 //System.out.println("Ending turn with " + Clock.getBytecodesLeft() + " bytecodes remaining.");
@@ -61,6 +63,23 @@ public class Robot {
         }
         return false;
     }
+
+    private void recordTrees() throws GameActionException {
+        TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
+        for(TreeInfo tree : nearbyTrees) {
+            if(!didSeeLastTurn(tree))
+                Messenger.recordNeutralTree(rc, tree);
+        }
+        treesFromLastTurn = nearbyTrees;
+    }
+
+    private boolean didSeeLastTurn(TreeInfo tree) {
+        for(TreeInfo lastTurnTree : treesFromLastTurn) {
+            if(tree.ID == lastTurnTree.ID) return true;
+        }
+        return false;
+    }
+
     /**
      * Attempts to move in a given direction, while avoiding small obstacles directly in the path.
      *

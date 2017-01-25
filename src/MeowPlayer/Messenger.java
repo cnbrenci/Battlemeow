@@ -316,6 +316,10 @@ public class Messenger {
         return rc.readBroadcast(Channels.SOLDIERS_CREATED);
     }
 
+    public static int getLumberjacksCreatedCount(RobotController rc) throws GameActionException {
+        return rc.readBroadcast(Channels.LUMBERJACKS_CREATED);
+    }
+
     public static int getTargetGardenerID(RobotController rc) throws GameActionException {
         return rc.readBroadcast(Channels.targetGardenerID);
     }

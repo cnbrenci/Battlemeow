@@ -32,7 +32,7 @@ public class PathPlanner2 {
         this.currentLocation=rc.getLocation();
         this.lastLocation=rc.getLocation();
     }
-    public void backtrack() throws GameActionException {
+    private void backtrack() throws GameActionException {
         //initially checks 90 deg left and right
         //if finds nothing, checks more
         //int anglesToCheck=(degreesOfMotion)/4+stuckCounter;
@@ -51,7 +51,7 @@ public class PathPlanner2 {
                 stuck=true;
         }
     }
-    public boolean isFree() {
+    private boolean isFree() {
         boolean isFree=false;
         if(Math.abs(currentLocation.directionTo(nextLocation).degreesBetween(directionToDestination))<angleDelta)
         {
@@ -122,7 +122,7 @@ public class PathPlanner2 {
         return done;
     }
 
-    public int getPossibleLocations(float distanceFromCurrentLocation) throws GameActionException{
+    private int getPossibleLocations(float distanceFromCurrentLocation) throws GameActionException{
         //gets possible locations
         //returs index of location closest to destination
         float closestDistance=999f;

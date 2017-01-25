@@ -9,9 +9,8 @@ import battlecode.common.*;
 public class Archon extends Robot{
 
     private int numGardenersHired = 0;
-    private int numGardenersAttemptedToHire = 0;
     private Direction awayFromCenter;
-    private Journey neverWalkAway;
+    private PathPlanner2 pathHandler;
     private boolean isBobTheBuilder;
 
     private PathPlanner2 test;
@@ -23,61 +22,39 @@ public class Archon extends Robot{
             System.out.println("I'm the first Archon on my team!");
             isBobTheBuilder = true;
         }
-
-        //neverWalkAway = new Journey(rc, rc.getLocation().add(awayFromCenter, 20));
-        //test = new PathPlanner2(rc,rc.getInitialArchonLocations(rc.getTeam().opponent())[0]);
-
+        //pathHandler = new PathPlanner2(rc);
     }
 
     @Override
     public void runOneTurn() throws GameActionException {
         // Try to walk away from the map midpoint
-        //test.move();
-        if(rc.canHireGardener(awayFromCenter.opposite())) {
-            rc.hireGardener(awayFromCenter.opposite());
-            rc.disintegrate();
-        }
-        /*
-        neverWalkAway.moveTowardsDestinationAndDontStopBelievin();
-        if(neverWalkAway.haveReachedDestination())
-            neverWalkAway = new Journey(rc, rc.getLocation().add(awayFromCenter, 10));
+        //pathHandler.move(rc.getLocation().add(awayFromCenter, rc.getType().strideRadius));
+        if(rc.canMove(awayFromCenter, rc.getType().strideRadius))
+            rc.move(awayFromCenter, rc.getType().strideRadius);
 
-        // Attempt to build a gardener in 1 of 3 angles towards the middle
         if(shouldHireGardener()) {
-            Direction gardenerHireDirection = getGardenerBuildDirection();
-            if (rc.canHireGardener(gardenerHireDirection)) {
-                rc.hireGardener(gardenerHireDirection);
-                numGardenersHired++;
-            }
-            numGardenersAttemptedToHire++;
+            Direction buildDir = getGardenerBuildDirection();
+            if(rc.canHireGardener(buildDir))
+                rc.hireGardener(buildDir);
         }
-        */
-        //tryMove(Utils.randomDirection());
-        // Broadcast archon's location for other robots on the team to know
-        //MapLocation myLocation = rc.getLocation();
-        //rc.broadcast(0,(int)myLocation.x);
-        //rc.broadcast(1,(int)myLocation.y);
+    }
+
+    private boolean canSeeAtLeastOneGardener() {
+        RobotInfo[] robots = rc.senseNearbyRobots(-1, rc.getTeam());
+        for(RobotInfo robot : robots) {
+            if(robot.type == RobotType.GARDENER) return true;
+        }
+        return false;
     }
 
     private boolean shouldHireGardener() throws GameActionException {
-        if(rc.getTreeCount() >= 30) {
+        if((rc.getTreeCount() / Messenger.getGardenersCreatedCount(rc)) > 6 && canSeeAtLeastOneGardener()) {
             return false;
         }
-
-        // if there are 5 gardeners nearby, they're probably stuck and it's not worth it to make more
-        RobotInfo[] robots = rc.senseNearbyRobots(-1, rc.getTeam());
-        int gardenerCnt = 0;
-        for(RobotInfo robot : robots) {
-            if(robot.getType() == RobotType.GARDENER)
-                gardenerCnt++;
-        }
-        if(gardenerCnt >= 5) return false;
 
         if(isBobTheBuilder) {
             if(numGardenersHired == 0) return true;
         }
-
-        if(Messenger.getScoutsCreatedCount(rc) <= 2 && rc.getTeamBullets() < 240) return false;
 
         int numArchons = rc.getInitialArchonLocations(rc.getTeam()).length;
         if(((double)numGardenersHired / (double)Messenger.getGardenersCreatedCount(rc) <= 1. / numArchons))
@@ -87,17 +64,14 @@ public class Archon extends Robot{
 
     private Direction getGardenerBuildDirection()
     {
-        int dirCounter = numGardenersAttemptedToHire % 3;
         Direction angleToCenter = awayFromCenter.opposite();
-        int nearest45 = 45*(Math.round((int)angleToCenter.getAngleDegrees()/45));
-        switch(dirCounter){
-            case 0:
-                return new Direction((float) Math.toRadians((double)nearest45-30));
-            case 1:
-                return new Direction((float) Math.toRadians((double)nearest45+30));
-            default:
-                return new Direction((float) Math.toRadians((double)nearest45));
-        }
+        if(rc.canHireGardener(angleToCenter)) return angleToCenter;
+        if(rc.canHireGardener(angleToCenter.rotateLeftDegrees(15f))) return angleToCenter.rotateLeftDegrees(15f);
+        if(rc.canHireGardener(angleToCenter.rotateRightDegrees(15f))) return angleToCenter.rotateRightDegrees(15f);
 
+        for (float deg = 1; deg < 360; deg+=5) {
+            if(rc.canHireGardener(angleToCenter.rotateLeftDegrees(deg))) return angleToCenter.rotateLeftDegrees(deg);
+        }
+        return angleToCenter;
     }
 }
